@@ -13,7 +13,16 @@ import { eq } from "drizzle-orm";
 const credentialsSchema = z.object({
   email: z.email(),
   password: z.string().min(1),
+  scope: z.enum(["user", "admin"]).optional(),
 });
+
+// Role-scoped single session: the customer /login and admin /admin/login
+// surfaces submit different `scope` values so admin creds can't authenticate
+// on the customer page (and vice versa).
+export function loginAllowed(role: "user" | "admin", scope: "user" | "admin"): boolean {
+  if (scope === "admin") return role === "admin";
+  return role !== "admin";
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   // Trust the deployment host (Vercel sets it) so Auth.js derives its own URL
@@ -23,17 +32,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: { signIn: "/login" },
   providers: [
     Credentials({
-      credentials: { email: {}, password: {} },
+      credentials: { email: {}, password: {}, scope: {} },
       async authorize(raw) {
         const parsed = credentialsSchema.safeParse(raw);
         if (!parsed.success) return null;
         const { email, password } = parsed.data;
+        const scope = parsed.data.scope ?? "user";
 
         const [user] = await db.select().from(users).where(eq(users.email, email));
         if (!user) return null;
 
         const valid = await bcrypt.compare(password, user.passwordHash);
         if (!valid) return null;
+
+        if (!loginAllowed(user.role, scope)) return null;
 
         return { id: user.id, email: user.email, name: user.name, role: user.role };
       },

@@ -160,6 +160,48 @@ export async function refundCredits(params: {
   return { balance: result.rows[0]!.balance };
 }
 
+/**
+ * Sets a wallet's balance AND monthly allowance to `credits` (a plan
+ * activation top-up, not a relative deduct/refund), resets the 30-day window,
+ * and writes one ledger row whose `delta` is the net change from the previous
+ * balance — all in a single atomic round-trip. `prev` reads the pre-UPDATE
+ * balance from the same statement snapshot, so the ledger delta is correct
+ * even though the UPDATE runs in the same CTE. Used by the checkout flow when
+ * a company subscribes to a paid plan.
+ */
+export async function activatePlanCredits(params: {
+  companyId: string;
+  walletType?: WalletType;
+  credits: number;
+  reason: string;
+  refId?: string;
+}): Promise<{ balance: number }> {
+  const { companyId, credits, reason, refId } = params;
+  const walletType = params.walletType ?? "ai_credits";
+  const walletId = await getWalletId(companyId, walletType);
+  if (!walletId) throw new WalletNotFoundError();
+
+  const result = await db.execute<{ balance: number }>(sql`
+    WITH prev AS (
+      SELECT balance AS old FROM credit_wallets WHERE id = ${walletId}
+    ), updated AS (
+      UPDATE credit_wallets
+      SET balance = ${credits}, allowance = ${credits}, reset_date = now() + interval '30 days'
+      WHERE id = ${walletId}
+      RETURNING id, balance
+    ), inserted AS (
+      INSERT INTO credit_transactions (wallet_id, delta, reason, ref_id)
+      SELECT updated.id, ${credits} - prev.old, ${reason}, ${refId ?? null}
+      FROM updated, prev
+      RETURNING wallet_id
+    )
+    SELECT balance FROM updated
+  `);
+  const row = result.rows[0];
+  if (!row) throw new WalletNotFoundError();
+  return { balance: row.balance };
+}
+
 export async function getUsageLedger(companyId: string, limit = 20) {
   const wallets = await getWallets(companyId);
   const walletIds = wallets.map((w) => w.id);

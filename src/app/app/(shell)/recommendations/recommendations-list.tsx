@@ -38,7 +38,8 @@ export function RecommendationsList({ insights, locale }: { insights: Insight[];
                 </div>
               </div>
               <h3 className="font-heading text-base font-bold">{insight.title}</h3>
-              <p className="text-sm text-muted-foreground">{insight.recommendedAction}</p>
+              <p className="text-sm font-medium text-foreground">{insight.recommendedAction}</p>
+              <p className="text-sm text-muted-foreground">{insight.businessImpact}</p>
               <div className="mt-1 flex gap-2">
                 <Button size="sm" onClick={() => setDialogOpen(true)}>
                   {t(locale, "recommendations.takeAction")}

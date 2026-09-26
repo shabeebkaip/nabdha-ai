@@ -11,11 +11,11 @@ export default auth((req) => {
   const { pathname } = req.nextUrl;
   const session = req.auth;
 
-  if (pathname.startsWith("/admin")) {
+  // /admin/login is the admin sign-in surface itself — must stay reachable
+  // while signed out, so it's exempt from the admin gate below.
+  if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
     if (!session?.user) {
-      const url = new URL("/login", req.url);
-      url.searchParams.set("callbackUrl", pathname);
-      return NextResponse.redirect(url);
+      return NextResponse.redirect(new URL("/admin/login", req.url));
     }
     if (session.user.role !== "admin") {
       return NextResponse.redirect(new URL("/app", req.url));
@@ -25,7 +25,9 @@ export default auth((req) => {
   if (pathname.startsWith("/app")) {
     if (!session?.user) {
       const url = new URL("/login", req.url);
-      url.searchParams.set("callbackUrl", pathname);
+      // Keep the query string (e.g. /app/checkout?plan=growth&cycle=annual) so
+      // the post-login redirect lands back on the exact intended page.
+      url.searchParams.set("callbackUrl", pathname + req.nextUrl.search);
       return NextResponse.redirect(url);
     }
   }

@@ -11,7 +11,7 @@
 1. **"Deployed to Vercel tomorrow" cannot mean the full spec.** The client spec is a 24-module, 22-screen, 10-revenue-stream platform with an admin panel, multi-provider AI routing, and real multi-format file ingestion. That is a multi-week build. In one day we can ship **one thing well**: a polished, deployed, clickable **investor demo of the core flow, on the seeded "Nabda Retail Demo" dataset, with LIVE AI on the 3 steps that matter (analysis, chat, report)** and everything else present as convincing, navigable UI. That is what an investor needs to answer the 5 success questions. Anything more is a coin flip on the deadline.
 2. **Pricing is contradictory across the client's own docs.** We have a recommended default (see §9) so we are not blocked, but the human must confirm 4 pricing decisions before the pricing page is "true." Until then the demo shows our recommended defaults, seeded and admin-editable.
 3. **We need AI provider API key(s) from the human today.** No key = no live AI = the demo falls back to pre-baked results (still demoable, but weaker). This is the #1 external dependency.
-4. **This plan assumes we DO NOT build real payment processing tomorrow.** Upgrade/Buy-Credits/checkout are demo flows (no real money moves). Real billing is Phase 2. Flagged so no one expects a live Stripe on day one.
+4. **This plan assumes we DO NOT build real payment processing tomorrow.** Upgrade/Buy-Credits/checkout are demo flows (no real money moves). Real billing is Phase 2. Flagged so no one expects a live Stripe on day one. **Update: the human has a Moyasar TEST sandbox — an optional realism upgrade over the mock, still no real money (§16.7).**
 
 ---
 
@@ -51,7 +51,7 @@ Nabda AI is an AI-powered Business Intelligence and decision-support SaaS for Sa
 Landing, Auth/Free-Trial, Company Onboarding, Data Upload (+ "use demo data"), AI Processing state, Executive Dashboard (Health Score + KPIs + trends), Insights, Risk & Opportunity Center, AI Recommendations, AI Analyst Chat, Report Generator + PDF, Presentation Generator (demo output), Credit Wallet + deduction, Pricing (monthly/annual), Upgrade (demo, no real payment), AI Solutions page, Consultation/Training/Integration/Enterprise request forms (persist leads), Billing (view only), Admin Dashboard (metrics + live config edit), AR/EN + RTL, seeded Nabda Retail Demo dataset, admin-config table.
 
 ### Explicitly OUT of scope tomorrow (deferred to M2/M3 — will creep if not named)
-Real payment processing / invoices; real multi-format ingestion & cleaning (PDF/xlsx parsing pipeline — tomorrow accepts upload but analyzes the seeded dataset); genuine multi-tenant data isolation hardening & audit logs (basic auth + row-scoping only); true multi-provider live routing logic (surface the concept; route to one configured provider); team accounts / RBAC beyond user-vs-admin; notifications system; digital products storefront & checkout; real consultant/training scheduling & payments; API access; mobile app; real forecasting models (LLM-generated forecast narrative only); comparison/share of reports; annual billing cycles logic beyond price display.
+Real payment processing / invoices (Moyasar TEST sandbox is allowed as a demo, but real production billing, payouts, refunds, and reconciliation are M2); real multi-format ingestion & cleaning (PDF/xlsx parsing pipeline — tomorrow accepts upload but analyzes the seeded dataset); genuine multi-tenant data isolation hardening & audit logs (basic auth + row-scoping only); true multi-provider live routing logic (surface the concept; route to one configured provider); team accounts / RBAC beyond user-vs-admin; notifications system; digital products storefront & checkout; real consultant/training scheduling & payments; API access; mobile app; real forecasting models (LLM-generated forecast narrative only); comparison/share of reports; annual billing cycles logic beyond price display.
 
 ---
 
@@ -67,6 +67,7 @@ Single Next.js (App Router) + TypeScript app on Vercel serving all three surface
 - Uploads: **Vercel Blob** (store the file; tomorrow we analyze the seeded dataset regardless).
 - UI: **Tailwind + shadcn/ui**, **Recharts** for charts, **next-intl** for AR/EN + RTL.
 - PDF: server-side render to PDF (React-PDF or Puppeteer-on-Vercel — devops to confirm which runs cleanly on Vercel functions; React-PDF is the safer/lazy pick).
+- Payments (demo): **mock always-succeeds checkout** by default; **Moyasar TEST sandbox** as an optional realism upgrade (§16.7). No real money in either case.
 
 ---
 
@@ -132,8 +133,11 @@ Repo, Next.js+TS, Tailwind+shadcn, DB provisioned + schema migrated + seed, auth
 ### M1 — Demo-Critical MVP (THE tomorrow deliverable)  → DEMOABLE: full core flow §32 end-to-end
 The exact core flow on seeded data + live AI on analysis/chat/report. This is what the investor sees. Maps to client screens 01–22 (see §10 map). **Cutline: if time runs short, degrade live AI to pre-baked JSON before dropping any screen from the click-through — the flow must be unbroken.**
 
+### M1.5 — Plan Purchase & Subscription Activation (MOCK payment; Moyasar-test optional) → DEMOABLE: Pricing → Checkout → active plan + credits, reflected in app + admin
+The missing conversion flow (see §16). A demo-only, always-succeeds checkout that turns a trial company into a paying subscriber and tops up its credits. Default = fully mocked card form; optional = Moyasar TEST sandbox behind the same activation logic. No real money either way.
+
 ### M2 — Phase 2 (client Doc B §32)  → after demo
-Real file ingestion (Excel/CSV/PDF parse + clean), real payments/billing, notifications, advanced dashboards, team accounts + RBAC, advanced/comparison reports, tenant-isolation hardening + audit logs, digital products storefront, real service scheduling.
+Real file ingestion (Excel/CSV/PDF parse + clean), real payments/billing (Moyasar LIVE + webhooks + invoices/refunds), notifications, advanced dashboards, team accounts + RBAC, advanced/comparison reports, tenant-isolation hardening + audit logs, digital products storefront, real service scheduling.
 
 ### M3 — Phase 3 Enterprise (client Doc B §33)  → later
 Enterprise AI, custom workflows, real statistical forecasting, industry models, enterprise integrations (ERP/CRM/POS), dedicated environments, advanced security, enterprise API, white-label, live multi-provider cost-based routing.
@@ -149,6 +153,7 @@ Until the human decides, the demo ships these defaults (deliberate merge; all ed
 - **Annual: flat monthly×12 −20%**, computed at runtime (ignore the broken printed annual numbers).
 - **Consultation: 375 SAR/hr, Nabda share 112.50 (30%)** — no conflict.
 > These map to the 4 open pricing decisions in §12. If the human overrides, we change config values, not code.
+> Note: `src/lib/pricing.ts` now ships Basic **49** / Growth **149** / Pro **399** SAR/mo with annual pre-discounted (471 / 1,430 / 3,830) and credits 1,000 / 4,000 / 12,000 — this file is the current source of truth the checkout in §16 charges against.
 
 ---
 
@@ -179,9 +184,10 @@ Until the human decides, the demo ships these defaults (deliberate merge; all ed
 | 21 | Billing | M1 | view plan/credits (no real pay) |
 | 22 | Admin Dashboard | M1 | metrics + live config edit |
 | — | AI Analyst Chat (§21/§4) | M1 | live AI, inside dashboard |
+| — | Checkout / Subscribe (§16) | M1.5 | MOCK payment (or Moyasar test) → activates plan + credits |
 | — | Notifications (§31) | M2 | |
 | — | Digital Products storefront (§24) | M2 | link/placeholder in M1 |
-| — | Real payments/invoices (§42) | M2 | |
+| — | Real payments/invoices (§42) | M2 | Moyasar LIVE + webhooks |
 | — | Real integrations engine (§20) | M3 | request form only in M1 |
 
 ---
@@ -216,6 +222,8 @@ Until the human decides, the demo ships these defaults (deliberate merge; all ed
 - **M1-DEPLOY [devops-engineer]** Promote to the demo URL (private preview by default — see §12 decision), verify no console errors, env keys set. **AC:** AC7 met; shareable URL.
 - **M1-PM [project-manager]** Verify milestone vs plan, update statuses honestly, write the plain-language demo-day summary + investor demo script (§54). **AC:** this file current; human briefed.
 
+### M1.5 — Plan Purchase & Subscription Activation — see §16 for the full spec, contract, and tasks.
+
 ### M2 / M3 — deferred (tasks expanded when M1 ships; owners pre-tagged)
 - Real ingestion pipeline [backend + ai], payments/billing [backend], notifications [frontend + backend], tenant-isolation + audit logs + security review [backend + code-reviewer + devops], advanced dashboards/reports [frontend + ai], team/RBAC [backend], statistical forecasting + industry models [ai], enterprise integrations + API [backend + devops], white-label [frontend]. Each still passes the 3 gates.
 
@@ -241,6 +249,8 @@ None of the three is ever waived, including under the tomorrow deadline.
 | R6 | **PDF/Puppeteer fails on Vercel serverless** | Medium | Medium | devops validates PDF path in M0; prefer React-PDF (no headless browser) to avoid function-size/timeout issues. |
 | R7 | **RTL/bilingual polish slips** | Medium | Medium | next-intl + logical CSS props from M0; QA checks AR RTL on landing + dashboard (AC6) as a gate, not an afterthought. |
 | R8 | **Scope creep from 10 revenue streams** | High | Medium | Streams beyond subscriptions/credits/reports/presentations are shown as forms/marketing only in M1 (§3 out-of-scope explicit). |
+| R9 | **Mock/test checkout mistaken for real billing** | Medium | Medium | Label checkout "Test mode — no real payment"; never accept/store/log real card data; price/credits derived server-side from config, never from the client (§16). Real gateway is M2. |
+| R10 | **Moyasar test integration eats demo time / breaks live** (if chosen over mock) | Medium | Medium | Ship the mock first (guaranteed); wire Moyasar test only as a stretch behind the SAME `/api/checkout` activation. Network/callback failure ⇒ fall back to mock. Keep secret key in `.env.local`, never client-side or committed. |
 
 ---
 
@@ -258,20 +268,114 @@ None of the three is ever waived, including under the tomorrow deadline.
 7. **Scope cutline approval:** Do you accept tomorrow = polished deployed clickable demo of the core flow on seeded "Nabda Retail Demo" data + live AI on analysis/chat/report, with the rest present as navigable UI (NOT the full 10-stream production platform, NO real payments)?
 8. **Deploy visibility:** Is tomorrow's Vercel deploy a **private preview** (recommended — password/preview-protected for the investor) or **public**?
 
+**Checkout / M1.5 (see §16.5 for the recommended answers):**
+9–14. Six decisions on the checkout — Enterprise stays "Contact Sales", no downgrade/cancel/proration, dedicated `/app/checkout` route, logged-out routing, transaction status label, and **mock vs Moyasar-test payment**. Defaults are chosen; confirm or override.
+
 > Per team rules, I will not choose the stack, spend money, or deploy without your go on 5–8. Building of keyless/fallback pieces (M0 scaffolding, schema, design spec) can start immediately in parallel.
 
 ---
 
 ## 15. PLAIN-LANGUAGE SUMMARY (for the non-technical owner)
 
-We cannot honestly build the entire Nabda AI platform in one day — it is genuinely a multi-week product. What we CAN deliver tomorrow, and what an investor actually needs, is a **real, deployed, clickable demo of the whole story**: a visitor signs up, sets up their company, loads the sample "Nabda Retail Demo" business, watches the AI analyze it, sees a professional dashboard with a Business Health Score, risks, opportunities and recommendations, chats with the AI analyst, downloads a PDF report, generates a presentation, watches their credits go down, sees the pricing plans, and requests consultation/training/integration/enterprise services — plus an admin screen where you can change prices and credits live. It will be bilingual Arabic/English and look like a premium business-intelligence platform, not a chatbot.
+We cannot honestly build the entire Nabda AI platform in one day — it is genuinely a multi-week product. What we CAN deliver tomorrow, and what an investor actually needs, is a **real, deployed, clickable demo of the whole story**: a visitor signs up, sets up their company, loads the sample "Nabda Retail Demo" business, watches the AI analyze it, sees a professional dashboard with a Business Health Score, risks, opportunities and recommendations, chats with the AI analyst, downloads a PDF report, generates a presentation, watches their credits go down, sees the pricing plans, **subscribes to a plan through a checkout (test payment — no real charge)**, and requests consultation/training/integration/enterprise services — plus an admin screen where you can change prices and credits live and watch revenue move. It will be bilingual Arabic/English and look like a premium business-intelligence platform, not a chatbot.
 
-To hit tomorrow, three things stay simple on purpose: it runs on the sample dataset (not your real files yet), it does not take real payments yet, and the "enterprise-grade security" story is real in direction but basic in depth for now. All of that is Phase 2. The AI is genuinely live on the parts that matter (analysis, chat, report) as long as you give us one AI key today; if not, it still runs on convincing pre-prepared results.
+To hit tomorrow, three things stay simple on purpose: it runs on the sample dataset (not your real files yet), it does not take real payments yet (a test/mock checkout stands in), and the "enterprise-grade security" story is real in direction but basic in depth for now. All of that is Phase 2. The AI is genuinely live on the parts that matter (analysis, chat, report) as long as you give us one AI key today; if not, it still runs on convincing pre-prepared results.
 
-I need eight decisions from you now (above) — mostly the pricing you want the investor to see, an OK on the tools, an AI key, and whether the demo link is private or public. Once I have those, the team builds tonight and we deploy tomorrow.
+I need decisions from you now (above) — mostly the pricing you want the investor to see, an OK on the tools, an AI key, whether the demo link is private or public, and whether the checkout is a simple mock or your Moyasar test sandbox. Once I have those, the team builds tonight and we deploy tomorrow.
 
 ---
 
-NEXT ACTION: Answer the 8 items in §14 (esp. AI key + scope + stack) → project-manager, then kick off M0-T1 → devops-engineer and M0-T4 → ui-ux-engineer in parallel.
+## 16. M1.5 — PLAN PURCHASE & SUBSCRIPTION ACTIVATION (MOCK / MOYASAR-TEST PAYMENT)
 
-YOUR DECISION NEEDED: All 8 items in §14 — the 4 pricing decisions, stack sign-off, which AI provider key you can supply today, approval of the tomorrow scope cutline, and private-vs-public deploy.
+> Owner sequencing: [ui-ux-engineer] (light) → [backend-developer] → [frontend-developer] → [qa-engineer] → [code-reviewer]. Demo-scoped and lean. **No real gateway charge, no real money — payment always succeeds (mock) or uses Moyasar TEST cards (sandbox).** Safe on localhost/preview.
+
+### 16.1 Why this exists
+The pricing page's plan buttons currently all say "Start Free Trial" and route to `/signup`. There is no way for a company to become a paying subscriber, so the "How does Nabda AI make money?" story (success question #4) has a dead end, and the admin MRR/paid-users numbers never move during a demo. M1.5 closes that loop.
+
+### 16.2 End-to-end user flow
+1. **Pricing page (`/pricing`, public, dark).** Basic / Growth / Pro cards get a **"Subscribe" / "Buy now"** CTA (localized) carrying the chosen `plan` + the current Monthly/Annual toggle value. **Custom stays "Contact Sales"** → `/enterprise` (unchanged).
+2. **Auth gate (logged-out only).** Clicking Subscribe while logged out routes to auth **preserving intent** via `callbackUrl`, e.g. `/login?callbackUrl=%2Fapp%2Fcheckout%3Fplan%3Dgrowth%26cycle%3Dannual`. Login already honors `callbackUrl` (verified in `login-form.tsx`). New users follow the signup link; `signup-form.tsx` is extended to honor the same `callbackUrl` after auto-sign-in (small change — see FE-2). Logged-in users go straight to checkout.
+3. **Checkout surface (`/app/checkout`, authed app shell, light).** A **dedicated route** (recommended over a modal — see 16.5-C). Server-reads `?plan=&cycle=`, validates them, and renders an **order summary** (plan name, cycle, price for that cycle, included monthly AI credits — from live pricing) plus the **payment step**, with a clear **"Test mode — no real payment is processed"** banner:
+   - **Mock variant (default):** a card form (cardholder name, card number, expiry, CVC) with a **published test-card placeholder** (`4242 4242 4242 4242`), client-side format validation only, **card data never leaves the browser.**
+   - **Moyasar-test variant (optional, §16.7):** the Moyasar hosted/JS form initialized with the **publishable** key; the customer enters a Moyasar TEST card; Moyasar returns a `payment.id`.
+4. **Submit → processing.** Mock: ~0.8–1.2s simulated delay, **always succeeds.** Moyasar-test: create/confirm the payment, then the server **verifies** the payment id via Moyasar's API before activating.
+5. **Activation (server, atomic-ish per neon-http pattern) — identical for both variants.** Upsert the company's `subscriptions` row to `(plan, billingCycle=cycle, status="active")`, insert a `transactions` row (`kind="subscription"`, `amountSar`=charged price, `status="paid"`), and **set** the `ai_credits` wallet `balance` + `allowance` to the plan's `creditsPerMonth` with a `creditTransactions` ledger entry.
+6. **Success state → land in app.** Success screen with the new plan + credit figures and a **"Go to dashboard"** CTA → `/app` (and/or `/app/credits`). `router.refresh()` so server components re-read. The credits page shows the new balance/allowance; **`/admin` shows paid-users +1 and MRR up by the plan's monthly price** (admin MRR is driven by `subscriptions.status="active"` — verified in `src/app/admin/(panel)/page.tsx`).
+7. **States:** loading (processing), error (declined/API 4xx/5xx → inline alert, form re-enabled, no mutation), success. Full **EN/AR + RTL**, premium look consistent with the app shell.
+
+### 16.3 API contract
+**`POST /api/checkout`** (`runtime = "nodejs"`; pattern mirrors `src/app/api/analysis/run/route.ts`)
+
+- **Auth:** `requireCompanySession()` → `{ companyId }`. Unauth → 401 `UNAUTHENTICATED`; no company → 403 `FORBIDDEN` (via `errorToResponse`).
+- **Request body (Zod):**
+  ```
+  { plan: "basic" | "growth" | "pro",
+    cycle: "monthly" | "annual",
+    paymentId?: string }   // present only in the Moyasar-test variant
+  ```
+  No card fields are ever sent. Unknown/`enterprise`/`custom` plan or bad cycle → 400 `VALIDATION_ERROR`, **no mutation**.
+- **Server logic (price & credits derived server-side — NEVER from the client):**
+  1. Resolve plan via `getLivePricingPlans()` (matches the price the user saw on `/pricing`); fall back to `getPlan(plan)` in `src/lib/pricing.ts`. `amountSar = cycle === "annual" ? annualPrice : monthlyPrice`; `credits = creditsPerMonth`.
+  2. **Confirm payment:**
+     - *Mock variant:* simulated processing delay (~1s), always OK.
+     - *Moyasar-test variant:* `GET {MOYASAR_API_BASE}/payments/{paymentId}` with HTTP Basic auth (`MOYASAR_SECRET_KEY` as username, blank password); require `status === "paid"` **and** `amount === amountSar * 100` (Moyasar amounts are in halalas) **and** currency SAR. Mismatch/unpaid → 402/400, no mutation.
+  3. Upsert `subscriptions` for `companyId`: `UPDATE ... SET plan, billing_cycle=cycle, status='active', started_at=now WHERE company_id=$1`; if 0 rows, INSERT (normally one seeded row per company).
+  4. INSERT `transactions`: `{ companyId, kind:"subscription", amountSar, status:"paid" }` → capture id as `refId`.
+  5. Top up `ai_credits` wallet to `credits`: **set** `balance = credits`, `allowance = credits`, `reset_date = now + 30 days`, write a `creditTransactions` row `delta = credits - previousBalance`, `reason = "subscription:activate"`, `refId = <transaction id>`. Same single data-modifying-CTE style as `src/lib/credits.ts` (new helper — see BE-2).
+- **Success response (200):**
+  ```
+  { plan, cycle, amountSar, credits: <newBalance>, subscriptionStatus: "active" }
+  ```
+- **Idempotency:** none for the demo — re-submitting re-activates the same plan. `// ponytail: no idempotency key; add one if demo re-clicks distort MRR.`
+
+### 16.4 Task breakdown by owner
+> Each task closes only via: [owner] self-test → [qa-engineer] PASS → [code-reviewer] APPROVE.
+
+**[ui-ux-engineer] (light — addendum only)**
+- **PC-D1** Add a "Checkout / Subscribe" section to `docs/DESIGN_SPEC.md`: `/app/checkout` layout (order summary + payment step), the "Test mode — no real payment" disclosure treatment, processing/success/error states, and the pricing-card CTA label change — EN + AR with RTL notes. Cover both the mock card form and (if chosen) the Moyasar hosted form slot. **AC:** spec covers all three states + RTL + the disclaimer; no new components beyond the existing system, or any new ones are named. *(Skip only if a designer confirms existing form/card patterns fully cover it.)*
+
+**[backend-developer]**
+- **PC-BE1** `POST /api/checkout` route per §16.3: Zod validation, `requireCompanySession`, server-derived price/credits, reject `enterprise`/`custom`, confirm payment (mock delay OR Moyasar verify), upsert subscription→active, insert transaction, top-up credits + ledger; errors via `errorToResponse`. **AC:** valid input returns 200 with correct `amountSar`+`credits` and (a) `subscriptions` row = active/selected plan/cycle, (b) a `transactions` subscription row with the charged amount, (c) `ai_credits` wallet balance+allowance = plan credits + one ledger row; invalid/enterprise → 400 no DB change; unauth → 401. No card data anywhere.
+- **PC-BE2** Add `activatePlanCredits({ companyId, credits, refId })` to `src/lib/credits.ts` — single-CTE set-to-target with a `creditTransactions` delta row, mirroring the atomic `deductCredits`/`refundCredits` pattern. **AC:** setting credits from any prior balance yields the correct new balance/allowance and matching ledger delta in one round-trip; includes a one-line runnable self-check (assert new balance == target, delta == target - prev).
+- **PC-BE3 (Moyasar-test variant ONLY)** Add a thin `verifyMoyasarPayment(paymentId)` server helper: `GET {MOYASAR_API_BASE}/payments/{id}` with Basic auth (`MOYASAR_SECRET_KEY`), assert `status==="paid"`, `amount===amountSar*100`, currency SAR. Keys from `process.env` only (`MOYASAR_SECRET_KEY`, `MOYASAR_API_BASE`); publishable key exposed to client via `NEXT_PUBLIC_MOYASAR_PUBLISHABLE_KEY`. Add all four to `.env.example` (names only, no values). **AC:** valid test payment verifies to true; tampered amount/unpaid → false → route returns 402/400 with no mutation; no secret in client bundle or logs. *(Not needed if the mock variant is chosen — decision 14.)*
+
+**[frontend-developer]**
+- **PC-FE1** Pricing cards (`pricing-card.tsx`): Basic/Growth/Pro CTA → localized **"Subscribe"**, linking to `/app/checkout?plan=<id>&cycle=<billing>` when authed, else `/login?callbackUrl=<encoded checkout url>`. Pass the current billing toggle from `pricing-plans.tsx` to the card. Custom unchanged ("Contact Sales" → `/enterprise`). **AC:** correct href per plan and billing; logged-out click lands on auth then returns to checkout with plan+cycle intact; Custom unchanged.
+- **PC-FE2** `signup-form.tsx`: honor a `callbackUrl` (safe, `/`-prefixed) param — after successful auto-sign-in, redirect there instead of `/app/onboarding` when present. **AC:** signing up from a Subscribe deep-link lands on `/app/checkout` with plan+cycle preserved; normal signup still goes to onboarding.
+- **PC-FE3** `/app/checkout` page + client form: server-read+validate `plan`/`cycle` (invalid → redirect to `/pricing` or graceful error), render order summary from live pricing, the payment step (mock card form with test-card placeholder + disclaimer + client-side validation, OR the Moyasar hosted form), submit → `POST /api/checkout` → processing → success ("Go to dashboard" + `router.refresh()`) / error states. Bilingual EN/AR + RTL, app-shell premium styling. **AC:** all three plans × both cycles render correct price/credits; submit succeeds (mock always; Moyasar test card) and lands on success; error path re-enables the form without mutating data; AR/RTL correct; no console errors.
+- **PC-FE4** i18n: add every new user-facing string (Subscribe CTA, checkout labels, card fields, test-mode disclaimer, processing/success/error copy) to `src/lib/i18n.ts` in **EN + AR**. **AC:** no hard-coded strings in FE1/FE3; both locales complete. *(May fold into FE1/FE3 commits.)*
+
+**[qa-engineer]**
+- **PC-QA** End-to-end verification against §16.6 on a running preview: logged-in and logged-out entry, all 3 plans, both cycles; confirm credits page + admin MRR/paid-users move by the expected amounts; tamper test (`plan=enterprise`, bad cycle → 400, no mutation); unauth POST → 401; (Moyasar variant) a declined/unpaid test card → error, no activation; AR/RTL; no console errors. **AC:** documented PASS/FAIL with severities; Critical/Major ⇒ back to owning dev then re-verify.
+
+**[code-reviewer]**
+- **PC-REV** Review the M1.5 diff: price/credits derived server-side (never trust client amount); (Moyasar) server verifies `paymentId` status+amount before activating — client "success" is never trusted; `companyId` scoping on every write; **no card/secret data persisted or logged**; secret key server-only (not in client bundle); credit mutation uses the atomic ledger helper; Zod validation; `callbackUrl` open-redirect guard (`/`-prefixed). **AC:** APPROVE / APPROVE-WITH-NITS / REQUEST-CHANGES with specifics.
+
+### 16.5 YOUR DECISION NEEDED — M1.5 (defaults chosen; confirm or override)
+- **9. Enterprise/Custom stays "Contact Sales"** (lead form), NOT purchasable. **Recommend: yes.**
+- **10. Downgrade / cancel / proration OUT of scope** — checkout simply activates the selected plan and overwrites the current subscription; no credit proration. **Recommend: yes (out of scope for the demo).**
+- **11. Checkout = dedicated route `/app/checkout`** (deep-linkable for the auth callback, survives refresh, easier RTL/state) vs a modal. **Recommend: dedicated route.**
+- **12. Logged-out "Subscribe" → `/login?callbackUrl=<checkout>`** (login already handles it) with `signup-form` extended to honor `callbackUrl` too. **Recommend: yes.**
+- **13. `transactions.status` = `"paid"`** for demo purchases (distinguishes them from seeded `"demo"` rows; does not affect MRR, which is subscription-based). **Recommend: "paid".**
+- **14. Payment variant: MOCK (default) vs MOYASAR TEST sandbox.** **Recommend: build the MOCK first (guaranteed, zero external dependency, always succeeds — the demo is safe), then wire Moyasar test ONLY as a stretch if M1 finishes with time to spare.** Both share the exact same server activation (§16.3 step 3–5); Moyasar only changes the "confirm payment" source (§16.3 step 2) + adds PC-BE3. Moyasar test makes the demo more credible (a real Saudi gateway, SADAD/mada test cards) but adds live-network + verification failure modes that can break a stage demo, so it must never be the only path.
+
+### 16.6 Acceptance criteria (explicit, verifiable)
+- **PC-AC1:** On `/pricing`, Basic/Growth/Pro show localized "Subscribe"; Custom shows "Contact Sales". Logged-out Subscribe lands on auth and returns to `/app/checkout` with the same plan+cycle; logged-in goes straight to checkout.
+- **PC-AC2:** Checkout shows the selected plan name, cycle, correct price (matches the `/pricing` figure for that cycle), and included monthly AI credits — in EN and AR with correct RTL.
+- **PC-AC3:** Completing payment (mock always-succeeds, or a Moyasar TEST card) shows a brief processing state and reaches a success state. No real charge; card data never reaches our server/DB/logs.
+- **PC-AC4:** After purchase: `subscriptions` row = (selected plan, selected cycle, `status="active"`); a `transactions` row exists (`kind="subscription"`, `amountSar`=charged price, `status="paid"`); `ai_credits` wallet `balance` & `allowance` = plan `creditsPerMonth`, with one `creditTransactions` ledger entry.
+- **PC-AC5:** `/app/credits` shows the new balance/allowance; `/admin` shows paid-users +1 and MRR increased by the plan's monthly price.
+- **PC-AC6:** Invalid/tampered input (`plan=enterprise` or unknown, bad cycle) → 400 with no row mutated; unauthenticated POST → 401. (Moyasar variant) an unpaid/amount-mismatched `paymentId` → 402/400 with no activation.
+- **PC-AC7:** Price and credits are computed server-side from pricing config — never taken from the request body; (Moyasar) activation happens only after server-side verification, never on client-reported success.
+
+### 16.7 Moyasar TEST sandbox — notes (only if decision 14 = Moyasar)
+- **Test mode only.** Keys supplied are `pk_test_…` / `sk_test_…` — sandbox, no real money. No production keys, no `LIVE` mode, no real payouts in this demo.
+- **Env vars (into `.env.local`, already gitignored; add names to `.env.example`):** `NEXT_PUBLIC_MOYASAR_PUBLISHABLE_KEY` (client-safe, `pk_test_…`), `MOYASAR_SECRET_KEY` (server-only, `sk_test_…`), `MOYASAR_API_BASE=https://api.moyasar.com/v1`, `MOYASAR_WEBHOOK_SECRET` (empty — webhooks not used; we verify by GET-polling the payment id, which is enough for a demo).
+- **Flow:** client Moyasar form (publishable key) → `payment.id` → `POST /api/checkout` with `paymentId` → server `verifyMoyasarPayment` (secret key, Basic auth) asserts `status="paid"` + amount/currency → activate. **No webhook** for the demo. `// ponytail: poll-verify on submit; add webhook + idempotency for production (M2).`
+- **SECURITY — action for the human:** the `sk_test_…` secret was pasted into chat. Test secrets are low-risk, but treat it as compromised-in-history: keep it out of the repo (env only) and **rotate it in the Moyasar dashboard** before any real use. Never expose the secret key client-side; only the `pk_test_` publishable key goes to the browser.
+
+---
+
+NEXT ACTION: Implement `POST /api/checkout` + `activatePlanCredits` helper (PC-BE1, PC-BE2) with the MOCK payment path → backend-developer. Defaults 9–13 are safe to start now; wire Moyasar test (PC-BE3) only if decision 14 = Moyasar and M1 lands with time to spare.
+
+YOUR DECISION NEEDED: Confirm §16.5 items 9–14 — the five checkout defaults, plus item 14: MOCK-only (recommended baseline) or MOCK-first-then-Moyasar-test-if-time. Silence = we proceed on the MOCK baseline. Also: put the Moyasar keys in `.env.local` (not chat/repo) and rotate the `sk_test_` secret since it was pasted here.

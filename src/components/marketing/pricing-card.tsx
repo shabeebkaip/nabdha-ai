@@ -103,12 +103,12 @@ export function PricingCard({
       </ul>
 
       <Button
-        render={<Link href={isCustom ? "/enterprise" : "/signup"} />}
+        render={<Link href={isCustom ? "/enterprise" : `/app/checkout?plan=${planId}&cycle=${billing}`} />}
         size="lg"
         variant={recommended ? "default" : "outline"}
         className="mt-8 w-full transition-transform active:translate-y-px"
       >
-        {isCustom ? t(locale, "pricing.cta.contactSales") : t(locale, "pricing.cta.start")}
+        {isCustom ? t(locale, "pricing.cta.contactSales") : t(locale, "pricing.cta.subscribe")}
       </Button>
     </div>
   );

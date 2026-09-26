@@ -31,9 +31,9 @@ const bandLabelKey: Record<Band, DictKey> = {
 };
 
 const bandStrokeVar: Record<Band, string> = {
-  danger: "var(--nabda-danger-bright)",
-  warning: "var(--nabda-warning-bright)",
-  success: "var(--nabda-success-bright)",
+  danger: "var(--color-danger-bright)",
+  warning: "var(--color-warning-bright)",
+  success: "var(--color-success-bright)",
 };
 
 const bandTextClass: Record<Band, string> = {

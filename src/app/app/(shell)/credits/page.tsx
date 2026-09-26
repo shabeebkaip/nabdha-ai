@@ -21,6 +21,7 @@ const REASON_LABEL: Record<string, DictKey> = {
   comprehensiveReport: "credits.reason.comprehensiveReport",
   presentationPerSlide: "credits.reason.presentationPerSlide",
   extraCredits: "credits.reason.extraCredits",
+  subscriptionActivate: "credits.reason.subscription",
 };
 
 function reasonLabel(reason: string, locale: Locale): string {
@@ -78,13 +79,9 @@ export default async function CreditsPage() {
           bodyKey="credits.buyDialog.body"
           variant="outline"
         />
-        <DemoActionDialog
-          locale={locale}
-          triggerLabel={t(locale, "credits.upgrade")}
-          titleKey="credits.buyDialog.title"
-          bodyKey="credits.buyDialog.body"
-          variant="outline"
-        />
+        <Button variant="outline" render={<Link href="/pricing" />}>
+          {t(locale, "credits.upgrade")}
+        </Button>
       </div>
 
       <div>

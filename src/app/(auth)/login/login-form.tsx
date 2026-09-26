@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn, getSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,19 +23,14 @@ export function LoginForm({ locale }: { locale: Locale }) {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
-    const result = await signIn("credentials", { email, password, redirect: false });
+    const result = await signIn("credentials", { email, password, scope: "user", redirect: false });
     setSubmitting(false);
     if (result?.error) {
       setError(t(locale, "auth.login.error"));
       return;
     }
-    // QA bug #4 fix: admins land on /admin, not /app, when there's no
-    // specific callbackUrl to honor (e.g. a non-admin bounced from a
-    // protected page still lands back on that exact page).
-    const session = await getSession();
-    const fallback = session?.user?.role === "admin" ? "/admin" : "/app";
     const callbackUrl = searchParams.get("callbackUrl");
-    router.push(callbackUrl && callbackUrl.startsWith("/") ? callbackUrl : fallback);
+    router.push(callbackUrl && callbackUrl.startsWith("/") ? callbackUrl : "/app");
     router.refresh();
   }
 
@@ -87,7 +82,10 @@ export function LoginForm({ locale }: { locale: Locale }) {
         <p className="mt-6 text-center text-sm text-muted-foreground">
           {t(locale, "auth.login.noAccount")}{" "}
           <Link
-            href="/signup"
+            href={(() => {
+              const cb = searchParams.get("callbackUrl");
+              return cb && cb.startsWith("/") ? `/signup?callbackUrl=${encodeURIComponent(cb)}` : "/signup";
+            })()}
             className="rounded-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             {t(locale, "auth.login.signupLink")}

@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,12 @@ import { AuthGlassCard } from "../_components/auth-glass-card";
 
 export function SignupForm({ locale }: { locale: Locale }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  // When arriving from "Subscribe" while logged out, return to checkout after
+  // account creation instead of the default onboarding.
+  const callbackUrl = searchParams.get("callbackUrl");
+  const safeCallback = callbackUrl && callbackUrl.startsWith("/") ? callbackUrl : null;
+  const loginHref = safeCallback ? `/login?callbackUrl=${encodeURIComponent(safeCallback)}` : "/login";
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -57,10 +63,10 @@ export function SignupForm({ locale }: { locale: Locale }) {
     setSubmitting(false);
     if (result?.error) {
       // Account was created but auto-signin failed (rare) — send to login.
-      router.push("/login");
+      router.push(loginHref);
       return;
     }
-    router.push("/app/onboarding");
+    router.push(safeCallback ?? "/app/onboarding");
     router.refresh();
   }
 
@@ -153,7 +159,7 @@ export function SignupForm({ locale }: { locale: Locale }) {
         <p className="mt-6 text-center text-sm text-muted-foreground">
           {t(locale, "auth.signup.haveAccount")}{" "}
           <Link
-            href="/login"
+            href={loginHref}
             className="rounded-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             {t(locale, "auth.signup.loginLink")}

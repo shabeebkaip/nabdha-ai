@@ -1,4 +1,4 @@
-import { AlertTriangle, TrendingUp, LineChart, Sparkles } from "lucide-react";
+import { AlertTriangle, TrendingUp, LineChart, Sparkles, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -52,17 +52,27 @@ export function InsightCard({ insight, locale }: { insight: Insight; locale: Loc
         <SeverityBadge severity={insight.severity} locale={locale} />
       </div>
       <h3 className="mt-3 font-heading text-base font-bold">{insight.title}</h3>
+
+      {/* Glanceable by default — DESIGN_SPEC §10 requires What/Why/Impact/Action
+          visible on these cards; the two most decision-relevant fields (what
+          happened, what to do) now render unconditionally instead of being
+          hidden behind a click. Why/impact stay a one-line disclosure below
+          so the card doesn't turn into a 4-paragraph wall of text in a
+          3-column grid. */}
+      <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground">{insight.whatHappened}</p>
+
+      <div className="mt-3 flex items-start gap-2 rounded-lg bg-muted/60 p-2.5">
+        <ArrowRight aria-hidden className="mt-0.5 size-3.5 shrink-0 text-primary" />
+        <p className="text-sm font-medium text-foreground">{insight.recommendedAction}</p>
+      </div>
+
       <Accordion className="mt-1">
         <AccordionItem value="details">
-          <AccordionTrigger className="text-sm text-primary hover:no-underline">
-            {t(locale, "insights.field.whatHappened")}
+          <AccordionTrigger className="text-xs text-primary hover:no-underline">
+            {t(locale, "insights.field.moreDetails")}
           </AccordionTrigger>
           <AccordionContent>
             <dl className="flex flex-col gap-3 text-sm">
-              <div>
-                <dt className="font-medium text-foreground">{t(locale, "insights.field.whatHappened")}</dt>
-                <dd className="mt-0.5 text-muted-foreground">{insight.whatHappened}</dd>
-              </div>
               <div>
                 <dt className="font-medium text-foreground">{t(locale, "insights.field.why")}</dt>
                 <dd className="mt-0.5 text-muted-foreground">{insight.why}</dd>
@@ -70,10 +80,6 @@ export function InsightCard({ insight, locale }: { insight: Insight; locale: Loc
               <div>
                 <dt className="font-medium text-foreground">{t(locale, "insights.field.businessImpact")}</dt>
                 <dd className="mt-0.5 text-muted-foreground">{insight.businessImpact}</dd>
-              </div>
-              <div>
-                <dt className="font-medium text-foreground">{t(locale, "insights.field.recommendedAction")}</dt>
-                <dd className="mt-0.5 text-foreground">{insight.recommendedAction}</dd>
               </div>
             </dl>
           </AccordionContent>
