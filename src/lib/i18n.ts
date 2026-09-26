@@ -414,6 +414,7 @@ const dictionaries = {
     "auth.signup.haveAccount": "Already have an account?",
     "auth.signup.loginLink": "Sign in",
     "auth.signup.errorEmailTaken": "An account with this email already exists.",
+    "auth.signup.errorPasswordShort": "Password must be at least 8 characters.",
     "auth.signup.errorGeneric": "We couldn't create your account. Please try again.",
 
     // --- Auth showcase pane (signup + login split-screen, illustrative demo data) ---
@@ -1423,6 +1424,7 @@ const dictionaries = {
     "auth.signup.haveAccount": "لديك حساب بالفعل؟",
     "auth.signup.loginLink": "تسجيل الدخول",
     "auth.signup.errorEmailTaken": "يوجد حساب مسجّل بهذا البريد الإلكتروني بالفعل.",
+    "auth.signup.errorPasswordShort": "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.",
     "auth.signup.errorGeneric": "تعذّر إنشاء حسابك. حاول مرة أخرى.",
 
     // --- Auth showcase pane (signup + login split-screen, illustrative demo data) ---

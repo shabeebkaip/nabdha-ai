@@ -33,8 +33,17 @@ export function SignupForm({ locale }: { locale: Locale }) {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!industry || !companySize) {
+    // Client-side checks for what `noValidate` (used for the custom Alert
+    // styling instead of native browser bubbles) otherwise silently skips —
+    // without these, a too-short password or empty field reaches the server,
+    // gets a 400, and the user only ever sees the generic
+    // "couldn't create account" message with no idea what to fix.
+    if (!name.trim() || !email.trim() || !companyName.trim() || !industry || !companySize) {
       setError(t(locale, "onboarding.error.required"));
+      return;
+    }
+    if (password.length < 8) {
+      setError(t(locale, "auth.signup.errorPasswordShort"));
       return;
     }
     setSubmitting(true);

@@ -29,8 +29,8 @@ function solutionLinks(locale: Locale): { href: string; label: string }[] {
 // new tab (external, downloadable PDFs/PPTX).
 const DOC_URLS = {
   feasibility: "https://w2kt4z6uudquyp8g.public.blob.vercel-storage.com/Nabdha_AI_Feasibility_Study_v2_260926_080205.pdf",
-  execSummary: "https://w2kt4z6uudquyp8g.public.blob.vercel-storage.com/_________________1.pdf",
-  deck: "https://w2kt4z6uudquyp8g.public.blob.vercel-storage.com/____-AI.pdf",
+  execSummary: "https://w2kt4z6uudquyp8g.public.blob.vercel-storage.com/Nabdha_AI_Executive_Summary.pdf",
+  deck: "https://w2kt4z6uudquyp8g.public.blob.vercel-storage.com/Nabda_AI_Investor_Deck.pdf",
 } as const;
 
 function resourceLinks(locale: Locale): { href: string; label: string; icon: LucideIcon }[] {
