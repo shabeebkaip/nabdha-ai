@@ -16,6 +16,9 @@ const credentialsSchema = z.object({
 });
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  // Trust the deployment host (Vercel sets it) so Auth.js derives its own URL
+  // from the request — no NEXTAUTH_URL/AUTH_URL env var required anywhere.
+  trustHost: true,
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
   providers: [
