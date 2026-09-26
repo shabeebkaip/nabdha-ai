@@ -30,7 +30,7 @@ function solutionLinks(locale: Locale): { href: string; label: string }[] {
 const DOC_URLS = {
   feasibility: "https://w2kt4z6uudquyp8g.public.blob.vercel-storage.com/Nabdha_AI_Feasibility_Study_v2_260926_080205.pdf",
   execSummary: "https://w2kt4z6uudquyp8g.public.blob.vercel-storage.com/_________________1.pdf",
-  deck: "https://w2kt4z6uudquyp8g.public.blob.vercel-storage.com/____-AI.pptx",
+  deck: "https://w2kt4z6uudquyp8g.public.blob.vercel-storage.com/____-AI.pdf",
 } as const;
 
 function resourceLinks(locale: Locale): { href: string; label: string; icon: LucideIcon }[] {
