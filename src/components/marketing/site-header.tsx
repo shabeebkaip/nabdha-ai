@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, FileText, ScrollText, Presentation, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { t, type Locale } from "@/lib/i18n";
@@ -25,12 +25,29 @@ function solutionLinks(locale: Locale): { href: string; label: string }[] {
   ];
 }
 
+// Investor/company documents — hosted publicly on Vercel Blob, opened in a
+// new tab (external, downloadable PDFs/PPTX).
+const DOC_URLS = {
+  feasibility: "https://w2kt4z6uudquyp8g.public.blob.vercel-storage.com/Nabdha_AI_Feasibility_Study_v2_260926_080205.pdf",
+  execSummary: "https://w2kt4z6uudquyp8g.public.blob.vercel-storage.com/_________________1.pdf",
+  deck: "https://w2kt4z6uudquyp8g.public.blob.vercel-storage.com/____-AI.pptx",
+} as const;
+
+function resourceLinks(locale: Locale): { href: string; label: string; icon: LucideIcon }[] {
+  return [
+    { href: DOC_URLS.feasibility, label: t(locale, "nav.doc.feasibility"), icon: FileText },
+    { href: DOC_URLS.execSummary, label: t(locale, "nav.doc.execSummary"), icon: ScrollText },
+    { href: DOC_URLS.deck, label: t(locale, "nav.doc.deck"), icon: Presentation },
+  ];
+}
+
 const linkClass =
   "rounded-sm text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
 
 export function SiteHeader({ locale }: { locale: Locale }) {
   const top = topLinks(locale);
   const solutions = solutionLinks(locale);
+  const resources = resourceLinks(locale);
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-background/95 backdrop-blur-xl backdrop-saturate-150 supports-[backdrop-filter]:bg-background/85">
@@ -89,6 +106,36 @@ export function SiteHeader({ locale }: { locale: Locale }) {
                 {t(locale, "nav.pricing")}
               </Link>
             </li>
+
+            {/* Resources dropdown — investor/company documents (external Blob). */}
+            <li className="group/res relative">
+              <button type="button" className={`flex items-center gap-1 ${linkClass}`} aria-haspopup="menu">
+                {t(locale, "nav.resources")}
+                <ChevronDown aria-hidden className="size-4 opacity-70 transition-transform duration-200 group-hover/res:rotate-180" />
+              </button>
+              <div className="invisible absolute end-0 top-full pt-3 opacity-0 transition-[opacity,transform] duration-200 group-hover/res:visible group-hover/res:opacity-100 group-focus-within/res:visible group-focus-within/res:opacity-100">
+                <div className="w-72 rounded-xl border border-white/10 bg-popover/95 p-2 shadow-[0_24px_50px_-20px_rgba(2,6,23,0.7)] backdrop-blur-xl">
+                  <p className="px-3 pt-1.5 pb-2 font-mono text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+                    {t(locale, "nav.resourcesMenuDesc")}
+                  </p>
+                  <ul>
+                    {resources.map((item) => (
+                      <li key={item.href}>
+                        <a
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground focus-visible:outline-none"
+                        >
+                          <item.icon aria-hidden className="size-4 shrink-0 text-primary" />
+                          {item.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </li>
           </ul>
         </nav>
 
@@ -122,6 +169,24 @@ export function SiteHeader({ locale }: { locale: Locale }) {
             <ul className="mt-1 flex flex-col gap-1">
               {solutions.map((item) => (
                 <MobileLink key={item.href} href={item.href} label={item.label} />
+              ))}
+            </ul>
+            <p className="mt-4 px-3 font-mono text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+              {t(locale, "nav.resources")}
+            </p>
+            <ul className="mt-1 flex flex-col gap-1">
+              {resources.map((item) => (
+                <li key={item.href}>
+                  <a
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
+                  >
+                    <item.icon aria-hidden className="size-4 shrink-0 text-primary" />
+                    {item.label}
+                  </a>
+                </li>
               ))}
             </ul>
             <div className="mt-4 flex flex-col gap-2">

@@ -206,9 +206,19 @@
    out. Darken just those two tokens for this component only — every other
    theme-cream surface (marketing cards on the cream sections) keeps the
    lighter default. */
+/* Auth form card (signup/login) on the light cream pane. shadcn's Input uses
+   `--input` for BOTH the fill (`bg-input/30`) and the border, so darkening the
+   token to make the border visible also turned the field fill muddy gray.
+   Instead: keep a visible card-edge hairline via `--border`, and give the
+   fields a clean WHITE fill + a subtle hairline by targeting the elements
+   directly (element selector out-specifies the Tailwind utility class). */
 .auth-glass-card {
-  --border: 240 10% 58%;
-  --input: 240 10% 58%;
+  --border: 240 10% 72%;
+}
+.auth-glass-card input,
+.auth-glass-card [data-slot="select-trigger"] {
+  background-color: hsl(var(--card));
+  border-color: hsl(240 10% 80%);
 }
 
 .nabda-numeral {

@@ -12,7 +12,8 @@ export const metadata: Metadata = { title: "Insights — Nabda AI" };
 
 export default async function InsightsPage() {
   const { companyId } = await requireCompanySession();
-  const [dashboard, locale] = await Promise.all([getDashboardData(companyId), getLocale()]);
+  const locale = await getLocale();
+  const dashboard = await getDashboardData(companyId, undefined, locale);
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-6">

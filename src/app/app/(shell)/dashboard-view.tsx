@@ -12,7 +12,7 @@ import { type Locale, t, tf } from "@/lib/i18n";
 import { DashboardOverview } from "@/components/app/dashboard-overview";
 
 export async function DashboardView({ companyId, locale }: { companyId: string; locale: Locale }) {
-  const [dashboard, datasets] = await Promise.all([getDashboardData(companyId), listDatasets(companyId)]);
+  const [dashboard, datasets] = await Promise.all([getDashboardData(companyId, undefined, locale), listDatasets(companyId)]);
 
   if (!dashboard) {
     return (

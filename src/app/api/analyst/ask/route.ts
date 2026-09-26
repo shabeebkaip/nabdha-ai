@@ -24,8 +24,9 @@ export async function POST(req: Request) {
       return apiError(400, "VALIDATION_ERROR", "Invalid input", parsed.error.flatten().fieldErrors as never);
     }
 
+    const locale = await getLocale();
     const company = await getCompanyById(companyId);
-    const dashboard = await getDashboardData(companyId, parsed.data.datasetId);
+    const dashboard = await getDashboardData(companyId, parsed.data.datasetId, locale);
     if (!company || !dashboard) {
       return apiError(404, "NO_ANALYSIS", "Run an analysis first so the AI Analyst has context.");
     }
@@ -35,7 +36,7 @@ export async function POST(req: Request) {
       companyName: company.name,
       industry: company.industry ?? "unknown",
       datasetSummary: {},
-      locale: await getLocale(),
+      locale,
       dashboard,
     });
 

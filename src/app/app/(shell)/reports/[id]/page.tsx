@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { ChevronLeft } from "lucide-react";
 import { requireCompanySession } from "@/lib/session";
-import { getReportById } from "@/lib/queries";
+import { getReportById, getDatasetById } from "@/lib/queries";
 import { getLocale } from "@/lib/get-locale";
-import { t } from "@/lib/i18n";
+import { t, tf } from "@/lib/i18n";
+import { datasetLabel } from "@/lib/dataset-display";
 import { ReportActions } from "./report-actions";
 
 export const metadata: Metadata = { title: "Report — Nabda AI" };
@@ -16,11 +18,24 @@ function slug(heading: string) {
 export default async function ReportViewerPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { companyId } = await requireCompanySession();
-  const [report, locale] = await Promise.all([getReportById(companyId, id), getLocale()]);
+  const report = await getReportById(companyId, id);
   if (!report) notFound();
+  const [locale, source] = await Promise.all([getLocale(), getDatasetById(companyId, report.datasetId)]);
 
   return (
-    <div className="mx-auto flex max-w-6xl gap-8">
+    <div className="mx-auto max-w-6xl">
+      {/* Back to the source this report belongs to — the report viewer is the
+          one route that leaves the source's detail page, so always give a way
+          back to it (not just browser-back). */}
+      <Link
+        href={`/app/data/${report.datasetId}`}
+        className="mb-6 inline-flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground print:hidden"
+      >
+        <ChevronLeft aria-hidden className="size-4 icon-directional" />
+        {tf(locale, "common.backTo", { source: source ? datasetLabel(source, locale) : t(locale, "appNav.myData") })}
+      </Link>
+
+      <div className="flex gap-8">
       <aside className="sticky top-20 hidden h-fit w-56 shrink-0 print:hidden lg:block">
         <p className="mb-2 font-mono text-[11px] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
           {t(locale, "reports.viewer.toc")}
@@ -60,6 +75,7 @@ export default async function ReportViewerPage({ params }: { params: Promise<{ i
             </section>
           ))}
         </div>
+      </div>
       </div>
     </div>
   );

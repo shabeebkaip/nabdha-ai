@@ -40,6 +40,12 @@ export function ProcessingClient({ locale, datasetId }: { locale: Locale; datase
   const [stageIndex, setStageIndex] = useState(0);
   const [status, setStatus] = useState<"running" | "done" | "error">("running");
   const startedAt = useRef(0);
+  // Re-entrancy guard: the analysis auto-run must fire exactly once per mount.
+  // Without it, React StrictMode's dev double-invoke of the effect below (and
+  // any accidental double-trigger) fires two POST /api/analysis/run for the
+  // same dataset — each deducts credits and writes a duplicate analysis row
+  // (QA Major: double-charge + duplicate analyses polluting the aggregate).
+  const autoRan = useRef(false);
 
   async function run() {
     if (!datasetId) {
@@ -82,6 +88,8 @@ export function ProcessingClient({ locale, datasetId }: { locale: Locale; datase
     // (before its first `await`) don't fire inside the effect's own
     // synchronous execution (react-hooks/set-state-in-effect) — behavior is
     // identical, just scheduled one microtask later.
+    if (autoRan.current) return;
+    autoRan.current = true;
     queueMicrotask(() => {
       run();
     });

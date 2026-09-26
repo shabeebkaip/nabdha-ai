@@ -8,6 +8,7 @@ import { db } from "@/db";
 import { analyses, companies, datasets, insights, reports } from "@/db/schema";
 import { computeHealthScore, healthBandFor } from "@/lib/health-score";
 import { toInsightDto } from "@/lib/mappers";
+import { t, type Locale } from "@/lib/i18n";
 import type { DashboardData, DashboardKpis, HealthFactorKey, Report } from "@/lib/ai/types";
 
 const HEALTH_FACTOR_KEYS: readonly HealthFactorKey[] = [
@@ -157,7 +158,11 @@ export async function getDatasetById(companyId: string, id: string): Promise<Dat
   };
 }
 
-export async function getDashboardData(companyId: string, datasetId?: string): Promise<DashboardData | null> {
+export async function getDashboardData(
+  companyId: string,
+  datasetId?: string,
+  locale: Locale = "en"
+): Promise<DashboardData | null> {
   // datasetId → that one source's own analysis (opened from My Data "View
   // results" — a per-dataset drill-in, deliberately NOT aggregated).
   if (datasetId) {
@@ -181,7 +186,19 @@ export async function getDashboardData(companyId: string, datasetId?: string): P
   const allAnalyses = await db.select().from(analyses).where(eq(analyses.companyId, companyId));
   if (allAnalyses.length === 0) return null;
 
-  const { kpis, healthScore, forecast } = aggregateAnalyses(allAnalyses);
+  const { kpis, healthScore, forecast: aggForecast } = aggregateAnalyses(allAnalyses);
+  // Multi-source: KPIs are weighted across all sources, but a single analysis's
+  // forecast prose cites that one source's numbers — which visibly contradicts
+  // the aggregated KPI cards (QA Major). Swap in a source-neutral portfolio
+  // line; the numeric expectedRevenue (derived from the aggregate) stays.
+  const forecast =
+    allAnalyses.length > 1
+      ? {
+          ...aggForecast,
+          expectedDemand: t(locale, "dashboard.forecast.aggregate.demand"),
+          potentialRisk: t(locale, "dashboard.forecast.aggregate.risk"),
+        }
+      : aggForecast;
   const insightRows = await db
     .select()
     .from(insights)
