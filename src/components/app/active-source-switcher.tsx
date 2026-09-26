@@ -16,7 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { datasetIcon, datasetLabel } from "@/lib/dataset-display";
+import { datasetIcon, datasetIconElement, datasetLabel } from "@/lib/dataset-display";
 import { t, type Locale } from "@/lib/i18n";
 import type { DatasetListItem } from "@/lib/queries";
 
@@ -26,7 +26,11 @@ export function ActiveSourceSwitcher({ locale, datasets }: { locale: Locale; dat
 
   const activeId = pathname.match(/^\/app\/data\/([^/]+)/)?.[1];
   const active = activeId ? datasets.find((d) => d.id === activeId) : undefined;
-  const ActiveIcon = active ? datasetIcon(active.sourceType) : LayoutDashboard;
+  const activeIconEl = active ? (
+    datasetIconElement(active.sourceType, "size-3.5 shrink-0 text-primary")
+  ) : (
+    <LayoutDashboard aria-hidden className="size-3.5 shrink-0 text-primary" />
+  );
 
   return (
     <DropdownMenu>
@@ -37,7 +41,7 @@ export function ActiveSourceSwitcher({ locale, datasets }: { locale: Locale; dat
             className="hidden max-w-56 items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:flex"
             aria-label={t(locale, "topbar.switchSource")}
           >
-            <ActiveIcon aria-hidden className="size-3.5 shrink-0 text-primary" />
+            {activeIconEl}
             <span className="truncate">
               {t(locale, "topbar.viewing")}: {active ? datasetLabel(active, locale) : t(locale, "topbar.allSources")}
             </span>

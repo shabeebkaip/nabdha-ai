@@ -24,7 +24,7 @@
 // i.e. per 1,000 requests (mixed): roughly $10-15, dominated by report/analysis calls.
 
 import { anthropic } from "@ai-sdk/anthropic";
-import { generateText, Output } from "ai";
+import { generateText, NoObjectGeneratedError, Output } from "ai";
 import { z } from "zod";
 import { computeHealthScore } from "@/lib/health-score";
 import { fallbackAiEngine } from "./fallback";
@@ -55,21 +55,48 @@ export function hasLiveAnthropicKey(): boolean {
   return !!key && key.startsWith("sk-ant-") && key !== "sk-ant-replace-me";
 }
 
-function logEngine(op: string, path: "live" | "fallback", extra?: Record<string, unknown>) {
-  // ponytail: console logging matches the project's existing "structured
-  // log" pattern at this scale (see src/lib/api-response.ts).
-  if (path === "fallback") console.error(`[ai-engine] ${op} -> fallback`, extra ?? "");
-  else console.log(`[ai-engine] ${op} -> live`, extra ?? "");
+// QA finding: the previous `logEngine(op, path, {error: String(err)})` shape
+// rendered as `{}` in the dev log (an object as the 2nd console arg is at
+// the mercy of whatever log viewer/serializer is watching stdout) — making
+// live-vs-fallback failures undiagnosable. Interpolating the detail directly
+// into the single string argument is immune to that: every viewer, JSON
+// logger, or terminal displays a string reliably.
+function logEngine(op: string, path: "live" | "fallback", detail?: Record<string, unknown>) {
+  // JSON-stringify so the real error name/message is surfaced (QA finding:
+  // `String(err)` used to render as `{}` in the dev log, masking why the live
+  // call fell back).
+  const suffix = detail ? ` — ${JSON.stringify(detail)}` : "";
+  if (path === "fallback") console.error(`[ai-engine] ${op} -> fallback${suffix}`);
+  else console.log(`[ai-engine] ${op} -> live${suffix}`);
 }
 
-// Code-review check: callers only ever pass `String(err)` as the `error`
-// field above. `String()` on an Error/AI-SDK error (AISDKError has no custom
-// toString) uses the default `Error.prototype.toString` = "<Name>: <message>"
-// — it does NOT serialize extra properties like APICallError's
-// `requestBodyValues`/`responseHeaders`/`responseBody`. The Anthropic API
-// key is sent as the outgoing `x-api-key` request header, which never
-// appears in the response headers Anthropic sends back, so it cannot reach
-// this log line either way. No secret/key can end up here.
+// `err.message` (not the full error object) is what ends up in the log
+// line above. For Error/AI-SDK errors this is just "<Name>: <message>" — it
+// never serializes APICallError's `requestBodyValues`/`responseHeaders`/
+// `responseBody`. The Anthropic API key is sent as the outgoing `x-api-key`
+// request header, which never appears in the response headers Anthropic
+// sends back, so it cannot reach this log line either way. No secret/key
+// can end up here.
+function describeError(err: unknown): string {
+  return err instanceof Error ? `${err.name}: ${err.message}` : String(err);
+}
+
+// Bounded retry specifically for AI_NoObjectGeneratedError (the model
+// responded, but the output didn't parse/validate against our schema —
+// usually mid-JSON truncation). generateText's own `maxRetries` handles
+// transient network/rate-limit errors; it does NOT retry a
+// successful-but-truncated response, so this is a deliberate extra layer:
+// 1 retry (2 attempts total) before the caller's catch block falls back to
+// the deterministic engine. Fixes the ~50% Arabic analysis fallback rate
+// QA measured (Arabic prose runs closer to the token ceiling than English).
+async function withObjectRetry<T>(fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn();
+  } catch (err) {
+    if (NoObjectGeneratedError.isInstance(err)) return fn();
+    throw err;
+  }
+}
 
 const HEALTH_FACTOR_KEYS = [
   "revenue",
@@ -130,7 +157,7 @@ export const claudeAiEngine: AiEngine = {
     const kpis = scenario.kpis;
 
     try {
-      const { output } = await generateText({
+      const { output } = await withObjectRetry(() => generateText({
         model: anthropic(ANALYSIS_MODEL),
         instructions: buildAnalysisInstructions(ctx.locale),
         prompt: buildAnalysisPrompt(ctx, kpis, healthScore, scenario.tone),
@@ -144,7 +171,7 @@ export const claudeAiEngine: AiEngine = {
         maxOutputTokens: 6144,
         maxRetries: 2,
         abortSignal: AbortSignal.timeout(TIMEOUT_MS),
-      });
+      }));
 
       logEngine("runAnalysis", "live", { tone: scenario.tone, insights: output.insights.length });
       return {
@@ -161,7 +188,7 @@ export const claudeAiEngine: AiEngine = {
         modelUsed: ANALYSIS_MODEL,
       };
     } catch (err) {
-      logEngine("runAnalysis", "fallback", { error: String(err) });
+      logEngine("runAnalysis", "fallback", { error: describeError(err) });
       return fallbackAiEngine.runAnalysis(ctx);
     }
   },
@@ -171,7 +198,7 @@ export const claudeAiEngine: AiEngine = {
     ctx: AnalysisContext & { dashboard: DashboardData }
   ): Promise<AnalystAnswer> {
     try {
-      const { output } = await generateText({
+      const { output } = await withObjectRetry(() => generateText({
         model: anthropic(ANALYST_MODEL),
         instructions: buildAnalystInstructions(ctx.locale),
         prompt: buildAnalystPrompt(ctx, question),
@@ -180,11 +207,11 @@ export const claudeAiEngine: AiEngine = {
         maxOutputTokens: 600,
         maxRetries: 2,
         abortSignal: AbortSignal.timeout(TIMEOUT_MS),
-      });
+      }));
       logEngine("askAnalyst", "live");
       return output;
     } catch (err) {
-      logEngine("askAnalyst", "fallback", { error: String(err) });
+      logEngine("askAnalyst", "fallback", { error: describeError(err) });
       return fallbackAiEngine.askAnalyst(question, ctx);
     }
   },
@@ -195,7 +222,7 @@ export const claudeAiEngine: AiEngine = {
     locale: Locale
   ): Promise<ReportSection[]> {
     try {
-      const { output } = await generateText({
+      const { output } = await withObjectRetry(() => generateText({
         model: anthropic(REPORT_MODEL),
         instructions: buildReportInstructions(locale),
         prompt: buildReportPrompt(dashboard, companyName),
@@ -204,7 +231,7 @@ export const claudeAiEngine: AiEngine = {
         maxOutputTokens: 4000, // same Arabic-headroom reasoning as runAnalysis above
         maxRetries: 2,
         abortSignal: AbortSignal.timeout(TIMEOUT_MS),
-      });
+      }));
       logEngine("draftReportSections", "live");
       // Headings/order/chartRef are fixed here (client §9's 11 sections),
       // never model-controlled — guarantees contract shape every time.
@@ -222,7 +249,7 @@ export const claudeAiEngine: AiEngine = {
         { heading: "Priority Actions", body: output.priorityActions },
       ];
     } catch (err) {
-      logEngine("draftReportSections", "fallback", { error: String(err) });
+      logEngine("draftReportSections", "fallback", { error: describeError(err) });
       return fallbackAiEngine.draftReportSections(dashboard, companyName, locale);
     }
   },

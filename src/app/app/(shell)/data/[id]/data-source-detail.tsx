@@ -21,7 +21,7 @@ import { AnalystClient } from "@/app/app/(shell)/analyst/analyst-client";
 import { DashboardOverview } from "@/components/app/dashboard-overview";
 import { ActionPlan } from "@/components/app/action-plan";
 import { ReportsList } from "@/components/app/reports-list";
-import { datasetIcon, datasetLabel } from "@/lib/dataset-display";
+import { datasetIconElement, datasetLabel } from "@/lib/dataset-display";
 import { t, type DictKey, type Locale } from "@/lib/i18n";
 import type { DashboardData, Report } from "@/lib/ai/types";
 import type { DatasetListItem } from "@/lib/queries";
@@ -76,7 +76,6 @@ export function DataSourceDetail({
   const pathname = usePathname();
   const activeTab: TabValue = isTabValue(initialTab) ? initialTab : "overview";
   const df = new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", { dateStyle: "medium" });
-  const Icon = datasetIcon(dataset.sourceType);
   const label = datasetLabel(dataset, locale);
   const recommendationInsights = dashboard?.insights.filter((i) => i.kind === "recommendation") ?? [];
   const nonRecommendationInsights = dashboard?.insights.filter((i) => i.kind !== "recommendation") ?? [];
@@ -92,7 +91,7 @@ export function DataSourceDetail({
       <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-5">
         <div className="flex items-center gap-3">
           <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Icon aria-hidden className="size-5" />
+            {datasetIconElement(dataset.sourceType)}
           </span>
           <div>
             <h1 className="font-heading text-lg font-bold tracking-tight">{label}</h1>

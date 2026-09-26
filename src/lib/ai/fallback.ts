@@ -15,7 +15,7 @@ import type {
   ReportSection,
 } from "./types";
 
-const SUGGESTED_ANSWERS: Record<string, AnalystAnswer> = {
+const SUGGESTED_ANSWERS_EN: Record<string, AnalystAnswer> = {
   "analyze my sales": {
     answer:
       "Sales grew 12.4% over the period, driven mainly by repeat purchases from your high-value customer segment.",
@@ -75,8 +75,77 @@ const SUGGESTED_ANSWERS: Record<string, AnalystAnswer> = {
   },
 };
 
+// Arabic mirror, keyed by the exact suggested-prompt chip text the Arabic
+// UI sends (src/lib/i18n.ts analyst.suggested.*) — safety net so a fallback
+// never answers an Arabic question in English (coordinator directive).
+const SUGGESTED_ANSWERS_AR: Record<string, AnalystAnswer> = {
+  "حلّل مبيعاتي": {
+    answer: "نمت المبيعات بنسبة 12.4% خلال هذه الفترة، مدفوعة بشكل رئيسي بمشتريات متكررة من شريحة العملاء ذوي القيمة العالية.",
+    reasons: [
+      "ارتفع تكرار الطلبات لدى كبار العملاء.",
+      "تفوقت الفئة B على توقعاتها.",
+      "تراجعت الفئة A بسبب تخفيضات المنافسين.",
+    ],
+    actions: ["مضاعفة العروض التي دفعت نمو الفئة B.", "مراجعة أسعار الفئة A مقارنة بالمنافسين."],
+  },
+  "ابحث عن أكبر خطر": {
+    answer:
+      "أكبر المخاطر حالياً هو تركّز المخزون في المنتجات ضعيفة الأداء — وهو ما يجمّد رأس المال الذي يمكن أن يمول فئات النمو لديك.",
+    reasons: [
+      "مجموعة صغيرة من المنتجات تستحوذ على حصة غير متناسبة من قيمة المخزون.",
+      "لم يتم تعديل كميات إعادة الطلب بعد تحوّل الطلب.",
+    ],
+    actions: ["إعادة توزيع ميزانية المخزون نحو الفئات الأعلى أداءً.", "إطلاق تصفية للمخزون الراكد لتحرير السيولة."],
+  },
+  "على ماذا يجب أن أركّز": {
+    answer:
+      "ركّز على إعادة توزيع المخزون بعيداً عن المنتجات ضعيفة الأداء ونحو شريحة عملائك الأعلى قيمة — فهذا يعالج أكبر مخاطرك وأكبر فرصك في آنٍ واحد.",
+    reasons: [
+      "مخاطر تركز المخزون وفرصة العملاء ذوي القيمة العالية هما أقوى إشارتين هذه الفترة.",
+      "التحرك على الاثنين معاً يضاعف الأثر على الهامش الربحي ونمو الإيرادات.",
+    ],
+    actions: ["إعادة توزيع المخزون نحو الفئات الأعلى أداءً.", "إطلاق عروض مخصصة للعملاء ذوي القيمة العالية."],
+  },
+  "توقّع مبيعات الشهر القادم": {
+    answer: "الإيرادات المتوقعة للفترة القادمة تبلغ تقريباً 1,393,760 ريال سعودي، استمراراً لاتجاه النمو الحالي.",
+    reasons: ["نمت الإيرادات لأربعة أشهر متتالية.", "من المتوقع استمرار ارتفاع الطلب في أفضل الفئات."],
+    actions: ["الحفاظ على مستوى الإنفاق التسويقي الحالي ومتابعة مزيج الفئات شهرياً."],
+  },
+  "ابحث عن فرص النمو": {
+    answer: "أوضح فرص النمو لديك هي ارتفاع تكرار الشراء لدى شريحة عملائك ذوي القيمة العالية والمجال المتاح لتوسيع الفئة B.",
+    reasons: [
+      "زاد العملاء ذوو القيمة العالية من تكرار طلباتهم خلال الشهرين الماضيين.",
+      "تتفوق الفئة B على التوقعات بطلب عضوي يفوق الإنفاق التسويقي.",
+    ],
+    actions: ["إنشاء عروض مخصصة للعملاء ذوي القيمة العالية.", "زيادة تخصيص المخزون والتسويق للفئة B."],
+  },
+};
+
+const GENERIC_FALLBACK_ANSWER: Record<Locale, AnalystAnswer> = {
+  en: {
+    answer:
+      "Based on your current dashboard, the most notable signal is the inventory concentration risk paired with rising high-value-customer demand.",
+    reasons: [
+      "These are the two highest-severity signals in your latest analysis.",
+      "Ask about sales, risks, growth opportunities, or next month's forecast for a more specific answer.",
+    ],
+    actions: ["Open the Insights tab to review all current risks and opportunities."],
+  },
+  ar: {
+    answer: "بناءً على لوحة التحكم الحالية، أبرز إشارة هي مخاطر تركز المخزون مقترنة بارتفاع الطلب من العملاء ذوي القيمة العالية.",
+    reasons: [
+      "هاتان أعلى الإشارتين خطورة في أحدث تحليل لديك.",
+      "اسأل عن المبيعات أو المخاطر أو فرص النمو أو توقعات الشهر القادم للحصول على إجابة أكثر تحديداً.",
+    ],
+    actions: ["افتح تبويب الرؤى (Insights) لمراجعة جميع المخاطر والفرص الحالية."],
+  },
+};
+
+// Strips trailing punctuation incl. the Arabic question mark (؟, U+061F —
+// a different codepoint from ASCII "?") so Arabic suggested-prompt chips
+// normalize the same way the English ones do.
 function normalize(q: string): string {
-  return q.trim().toLowerCase().replace(/[?.!]+$/g, "");
+  return q.trim().toLowerCase().replace(/[?؟.!]+$/g, "");
 }
 
 export const fallbackAiEngine: AiEngine = {
@@ -85,8 +154,10 @@ export const fallbackAiEngine: AiEngine = {
     // keywords + a stable hash so different uploads produce different,
     // deterministic results instead of everything showing the same 78/100
     // (the seeded demo dataset, which has no fileName, stays pinned exactly
-    // to the client §33 / AC2 numbers — see scenario.ts).
-    const scenario = deriveScenario(ctx.datasetSummary);
+    // to the client §33 / AC2 numbers — see scenario.ts). Passing ctx.locale
+    // through gets Arabic canned prose when locale is 'ar' (see
+    // scenario.ts's forecastForTone/insightsForTone).
+    const scenario = deriveScenario(ctx.datasetSummary, ctx.locale);
     return {
       healthScore: computeHealthScore(scenario.factors),
       kpis: scenario.kpis,
@@ -96,29 +167,24 @@ export const fallbackAiEngine: AiEngine = {
     };
   },
 
-  async askAnalyst(question: string): Promise<AnalystAnswer> {
+  async askAnalyst(question: string, ctx: AnalysisContext): Promise<AnalystAnswer> {
+    const suggested = ctx.locale === "ar" ? SUGGESTED_ANSWERS_AR : SUGGESTED_ANSWERS_EN;
     const key = normalize(question);
-    if (SUGGESTED_ANSWERS[key]) return SUGGESTED_ANSWERS[key];
+    if (suggested[key]) return suggested[key];
     // loose match for near-variants of the suggested questions
-    const match = Object.keys(SUGGESTED_ANSWERS).find(
-      (k) => key.includes(k) || k.includes(key)
-    );
-    if (match) return SUGGESTED_ANSWERS[match]!;
-    return {
-      answer:
-        "Based on your current dashboard, the most notable signal is the inventory concentration risk paired with rising high-value-customer demand.",
-      reasons: [
-        "These are the two highest-severity signals in your latest analysis.",
-        "Ask about sales, risks, growth opportunities, or next month's forecast for a more specific answer.",
-      ],
-      actions: ["Open the Insights tab to review all current risks and opportunities."],
-    };
+    const match = Object.keys(suggested).find((k) => key.includes(k) || k.includes(key));
+    if (match) return suggested[match]!;
+    return GENERIC_FALLBACK_ANSWER[ctx.locale];
   },
 
-  // ponytail: locale accepted for interface parity but unused — deterministic
-  // fallback text isn't localized (acceptable per coordinator sign-off: live
-  // engine is the path that must localize; fallback only serves as a
-  // last-resort demo-safety net).
+  // ponytail: locale accepted for interface parity but unused. runAnalysis
+  // and askAnalyst above now DO localize (safety net, they're the surfaces
+  // QA flagged as visible on the RTL dashboard). This scaffold text remains
+  // English-only — reports are a generated document, not the live RTL
+  // dashboard, and it will already interpolate the (now Arabic-capable)
+  // insight titles/text from `dashboard.insights` when locale is 'ar'; a
+  // fully Arabic report scaffold is a reasonable next follow-up, not done
+  // here to keep this fix scoped to what was reported.
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async draftReportSections(dashboard: DashboardData, companyName: string, _locale?: Locale): Promise<ReportSection[]> {
     const risks = dashboard.insights.filter((i) => i.kind === "risk");
