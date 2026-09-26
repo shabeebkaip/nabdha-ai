@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nabdha AI — Platform Presentation</title>
+<style>
+:root{
+  --void:#05050a;
+  --void-2:#0b0b16;
+  --void-3:#12121f;
+  --line: rgba(255,255,255,0.07);
+  --line-soft: rgba(255,255,255,0.04);
+  --cream:#f2f0eb;
+  --ink:#05050a;
+  --ink-soft: rgba(5,5,10,0.62);
+  --ink-faint: rgba(5,5,10,0.4);
+  --txt: rgba(242,240,235,0.92);
+  --txt-soft: rgba(242,240,235,0.62);
+  --txt-faint: rgba(242,240,235,0.4);
+  --blue:#1a56ff;
+  --teal:#00c9a7;
+  --purple:#8b5cf6;
+  --amber:#f59e0b;
+  --pink:#ec4899;
+  --red:#ef4444;
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Helvetica, Arial, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Menlo', 'Cascadia Code', monospace;
+  --ease: cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0;font-family:var(--font-body);background:var(--cream);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5;}
+img,svg{max-width:100%;display:block;}
+.ic{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+.wrap{max-width:1220px;margin:0 auto;padding:0 32px;}
+@media (max-width:640px){ .wrap{padding:0 20px;} }
+
+/* ---------- chrome ---------- */
+#progress{position:fixed;top:0;left:0;height:3px;background:var(--blue);z-index:100;width:0%;box-shadow:0 0 10px var(--blue);}
+.topbar{position:fixed;top:0;left:0;right:0;height:64px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;z-index:90;background:rgba(5,5,10,0.82);backdrop-filter:blur(20px) saturate(160%);border-bottom:1px solid var(--line);}
+.brand{display:flex;align-items:center;gap:9px;color:var(--txt);text-decoration:none;}
+.brand-mark{width:8px;height:8px;border-radius:50%;background:var(--blue);box-shadow:0 0 8px var(--blue);}
+.brand-word{font-family:var(--font-display);font-size:16px;font-weight:800;letter-spacing:-0.01em;}
+.brand-sub{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--txt-faint);text-transform:uppercase;margin-left:6px;}
+.nav-links{display:flex;gap:24px;list-style:none;margin:0;padding:0;}
+.nav-links a{color:var(--txt-soft);text-decoration:none;font-size:13px;font-weight:500;transition:color 160ms;}
+.nav-links a:hover{color:var(--txt);}
+@media (max-width:900px){ .nav-links{display:none;} }
+.nav-cta{display:flex;align-items:center;gap:10px;background:var(--blue);color:#fff;border:none;border-radius:100px;
+  padding:9px 18px;font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;
+  cursor:pointer;transition:transform 160ms var(--ease), box-shadow 160ms var(--ease);}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 12px 30px rgba(26,86,255,0.35);}
+
+#drawer-overlay{position:fixed;inset:0;background:rgba(2,2,5,0.6);opacity:0;pointer-events:none;transition:opacity 220ms var(--ease);z-index:95;}
+#drawer-overlay.open{opacity:1;pointer-events:auto;}
+#drawer{position:fixed;top:0;right:0;bottom:0;width:min(380px,88vw);background:var(--void-2);border-left:1px solid var(--line);
+  z-index:96;transform:translateX(100%);transition:transform 320ms var(--ease);overflow-y:auto;padding:88px 0 40px;}
+#drawer.open{transform:translateX(0);}
+.drawer-close{position:absolute;top:22px;right:24px;background:none;border:none;color:var(--txt-soft);font-size:22px;cursor:pointer;line-height:1;}
+.drawer-list{list-style:none;margin:0;padding:0 12px;}
+.drawer-list a{display:flex;gap:14px;align-items:baseline;padding:10px 16px;border-radius:10px;text-decoration:none;
+  color:var(--txt-soft);font-size:13.5px;transition:background 140ms, color 140ms;}
+.drawer-list a:hover, .drawer-list a.active{background:rgba(26,86,255,0.1);color:var(--txt);}
+.drawer-list a.active{color:#6d94ff;}
+.drawer-list .num{font-family:var(--font-mono);font-size:10.5px;color:var(--txt-faint);min-width:20px;}
+.drawer-group{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt-faint);
+  padding:20px 26px 8px;}
+
+#jumpctl{position:fixed;right:22px;bottom:22px;display:flex;flex-direction:column;gap:8px;z-index:80;}
+.jumpbtn{width:40px;height:40px;border-radius:50%;background:rgba(5,5,10,0.85);backdrop-filter:blur(12px);
+  border:1px solid var(--line);color:#6d94ff;display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:transform 140ms var(--ease), border-color 140ms;}
+.jumpbtn:hover{border-color:var(--blue);transform:translateY(-2px);}
+@media (max-width:640px){ #jumpctl{display:none;} }
+
+/* ---------- section shell ---------- */
+.sec{padding:110px 0;position:relative;overflow:hidden;min-height:100vh;display:flex;align-items:center;}
+.sec > .wrap{width:100%;}
+.sec.dark{background:var(--void);color:var(--txt);}
+.sec.cream{background:var(--cream);color:var(--ink);}
+@media (max-width:640px){ .sec{padding:72px 0;} }
+.sec-index{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;position:absolute;top:34px;right:32px;color:var(--txt-faint);}
+.cream .sec-index{color:var(--ink-faint);}
+
+.eyebrow{font:700 11.5px/1 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--blue);
+  margin:0 0 20px;display:flex;align-items:center;gap:10px;}
+.eyebrow::before{content:'';width:22px;height:1px;background:var(--blue);}
+h2.headline{font-family:var(--font-display);font-weight:800;font-size:clamp(2rem,4vw,3.1rem);line-height:1.06;
+  letter-spacing:-0.025em;margin:0 0 20px;max-width:820px;}
+h2.headline em, h1 em{font-style:normal;font-family:var(--font-serif);font-weight:400;font-style:italic;color:var(--txt-faint);}
+.cream h2.headline em{color:var(--ink-faint);}
+h3.subhead{font-family:var(--font-display);font-weight:800;font-size:clamp(1.1rem,2vw,1.4rem);letter-spacing:-0.015em;margin:0 0 12px;}
+.lede{font-size:1.05rem;line-height:1.68;max-width:640px;color:var(--txt-soft);}
+.cream .lede{color:var(--ink-soft);}
+.section-head{margin-bottom:52px;}
+
+.tag{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:.07em;
+  text-transform:uppercase;padding:5px 11px;border-radius:100px;line-height:1;white-space:nowrap;font-weight:700;}
+.tag-mvp{background:rgba(26,86,255,0.1);color:#6d94ff;border:1px solid rgba(26,86,255,0.3);}
+.cream .tag-mvp{color:#1a56ff;background:rgba(26,86,255,0.07);}
+.tag-future{background:rgba(139,92,246,0.1);color:#b39bfb;border:1px solid rgba(139,92,246,0.3);}
+.cream .tag-future{color:#7c4ee8;background:rgba(139,92,246,0.07);}
+.tag-assumption{background:transparent;border:1px dashed var(--txt-faint);color:var(--txt-faint);font-style:italic;font-weight:500;}
+.cream .tag-assumption{border-color:var(--ink-faint);color:var(--ink-faint);}
+.tag-example{background:transparent;border:1px dotted var(--txt-faint);color:var(--txt-soft);font-weight:500;}
+.cream .tag-example{color:var(--ink-soft);border-color:var(--ink-faint);}
+.tag-open{background:rgba(239,68,68,0.1);color:#f38a8a;border:1px solid rgba(239,68,68,0.3);}
+
+/* ---------- blobs ---------- */
+.blob{position:absolute;border-radius:50%;pointer-events:none;filter:blur(70px);z-index:0;}
+
+/* ---------- grids/cards ---------- */
+.grid{display:grid;gap:18px;}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+@media (max-width:900px){ .grid-3,.grid-4{grid-template-columns:repeat(2,1fr);} }
+@media (max-width:640px){ .grid-2,.grid-3,.grid-4{grid-template-columns:1fr;} }
+
+.card{background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:16px;padding:26px;position:relative;
+  overflow:hidden;transition:transform 220ms var(--ease), border-color 220ms;}
+.cream .card{background:#fff;border-color:rgba(5,5,10,0.08);}
+.card:hover{transform:translateY(-3px);}
+.card .icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:18px;}
+.card h4{font-family:var(--font-display);font-size:1.02rem;font-weight:800;margin:0 0 8px;letter-spacing:-0.01em;}
+.card p{margin:0;font-size:.88rem;color:var(--txt-soft);line-height:1.6;}
+.cream .card p{color:var(--ink-soft);}
+.card .ghost{position:absolute;bottom:-14px;right:-10px;width:110px;height:110px;opacity:.08;z-index:0;}
+.card > *{position:relative;z-index:1;}
+.card.top-accent{border-top-width:3px;border-top-style:solid;}
+.card.mini{padding:18px;}
+.card.mini h4{font-size:.86rem;margin-bottom:5px;}
+.card.mini p{font-size:.78rem;}
+.card.mini .icon{width:32px;height:32px;border-radius:9px;margin-bottom:12px;}
+.card.mini.border-red{border-color:var(--line);border-top-color:var(--red);}
+.cream .card.mini.border-red{border-color:rgba(5,5,10,0.08);border-top-color:var(--red);}
+.card.mini.border-teal{border-color:var(--line);border-top-color:var(--teal);}
+.cream .card.mini.border-teal{border-color:rgba(5,5,10,0.08);border-top-color:var(--teal);}
+
+/* ---------- stat line (market-size callouts) ---------- */
+.statline{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:36px;padding-top:28px;border-top:1px solid rgba(5,5,10,0.08);}
+.dark .statline{border-color:var(--line);}
+@media (max-width:900px){ .statline{grid-template-columns:repeat(2,1fr);} }
+@media (max-width:640px){ .statline{grid-template-columns:1fr;} }
+.stat .n{font-family:var(--font-display);font-weight:900;font-size:1.9rem;letter-spacing:-0.02em;color:var(--blue);line-height:1.1;}
+.stat .l{font-size:.8rem;color:var(--ink-soft);margin-top:6px;line-height:1.4;}
+.dark .stat .l{color:var(--txt-soft);}
+
+/* accent utility classes */
+.accent-blue{color:#6d94ff;} .cream .accent-blue{color:var(--blue);}
+.accent-teal{color:#4fe0c4;} .cream .accent-teal{color:#0aa88b;}
+.accent-purple{color:#b39bfb;} .cream .accent-purple{color:#7c4ee8;}
+.accent-amber{color:#ffc266;} .cream .accent-amber{color:#c9790a;}
+.accent-pink{color:#ff9ac4;} .cream .accent-pink{color:#d6317f;}
+.accent-red{color:#ff9494;} .cream .accent-red{color:#d63333;}
+.bg-blue{background:rgba(26,86,255,0.1);} .bg-teal{background:rgba(0,201,167,0.1);} .bg-purple{background:rgba(139,92,246,0.1);}
+.bg-amber{background:rgba(245,158,11,0.1);} .bg-pink{background:rgba(236,72,153,0.1);} .bg-red{background:rgba(239,68,68,0.1);}
+.border-blue{border-color:var(--blue);} .border-teal{border-color:var(--teal);} .border-purple{border-color:var(--purple);}
+.border-amber{border-color:var(--amber);} .border-pink{border-color:var(--pink);} .border-red{border-color:var(--red);}
+
+/* ---------- pill clusters ---------- */
+.pill-group{margin-bottom:26px;}
+.pill-group-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.pill-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.pill-group-label{font-family:var(--font-mono);font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--txt);white-space:nowrap;}
+.cream .pill-group-label{color:var(--ink);}
+.pill-group-line{flex:1;height:1px;background:var(--line);}
+.cream .pill-group-line{background:rgba(5,5,10,0.09);}
+.pill-row{display:flex;flex-wrap:wrap;gap:8px;}
+.pill{font-family:var(--font-mono);font-size:12px;padding:6px 12px;border-radius:8px;border:1px solid;}
+
+/* ---------- flow row ---------- */
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin-top:8px;}
+.flow-node{flex:1 1 160px;background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:150px;}
+.cream .flow-node{background:#fff;border-color:rgba(5,5,10,0.08);}
+.flow-node .t{font-family:var(--font-display);font-weight:800;font-size:.95rem;margin-bottom:4px;}
+.flow-node .d{font-size:.8rem;color:var(--txt-soft);}
+.cream .flow-node .d{color:var(--ink-soft);}
+.flow-node .fic{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+.flow-node .fic svg{width:15px;height:15px;}
+.flow-arrow{flex:0 0 38px;display:flex;align-items:center;justify-content:center;color:var(--blue);}
+@media (max-width:760px){ .flow{flex-direction:column;} .flow-arrow{transform:rotate(90deg);height:22px;} }
+
+/* ---------- step list (journeys) — continuous connected process ---------- */
+.steps{position:relative;margin-top:14px;}
+.steps::before{content:'';position:absolute;left:16px;top:6px;bottom:6px;width:2px;
+  background:linear-gradient(var(--blue),rgba(26,86,255,0.12));z-index:0;}
+.cream .steps::before{background:linear-gradient(var(--blue),rgba(26,86,255,0.22));}
+.step{display:flex;gap:18px;padding:16px 0;position:relative;z-index:1;}
+.step-badge{flex:0 0 34px;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-mono);font-size:12.5px;font-weight:800;background:#132347;color:#6d94ff;
+  box-shadow:0 0 0 6px var(--void);}
+.cream .step-badge{background:#e4eaff;color:var(--blue);box-shadow:0 0 0 6px var(--cream);}
+.step-badge.teal{background:#0f2b26;color:#4fe0c4;}
+.cream .step-badge.teal{background:#dcf4ee;color:#0aa88b;}
+.step h4{font-family:var(--font-display);font-size:.98rem;font-weight:800;margin:0 0 5px;}
+.step p{margin:0;font-size:.86rem;color:var(--txt-soft);line-height:1.6;max-width:620px;}
+.cream .step p{color:var(--ink-soft);}
+
+/* ---------- table ---------- */
+.tblwrap{overflow-x:auto;margin-top:8px;border-radius:14px;border:1px solid var(--line);}
+.cream .tblwrap{border-color:rgba(5,5,10,0.08);}
+table.cmp{border-collapse:collapse;width:100%;min-width:600px;background:rgba(255,255,255,0.02);}
+.cream table.cmp{background:#fff;}
+table.cmp th, table.cmp td{padding:13px 18px;text-align:left;font-size:.86rem;border-bottom:1px solid var(--line);vertical-align:top;}
+.cream table.cmp th, .cream table.cmp td{border-color:rgba(5,5,10,0.08);}
+table.cmp th{font-family:var(--font-mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--txt-faint);}
+.cream table.cmp th{color:var(--ink-faint);}
+table.cmp tr:last-child td{border-bottom:none;}
+table.cmp td.hi{color:#6d94ff;font-weight:800;}
+.cream table.cmp td.hi{color:var(--blue);}
+
+/* ---------- double blind / paired cards ---------- */
+.blind{display:flex;align-items:center;gap:18px;margin-top:22px;flex-wrap:wrap;}
+.blind-card{flex:1 1 200px;background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:14px;padding:20px;
+  text-align:center;min-width:170px;}
+.cream .blind-card{background:#fff;border-color:rgba(5,5,10,0.08);}
+.blind-mid{flex:0 0 auto;text-align:center;color:#6d94ff;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;
+  text-transform:uppercase;padding:0 6px;}
+
+/* ---------- hub diagram ---------- */
+.hub{position:relative;width:100%;max-width:480px;aspect-ratio:1;margin:0 auto;}
+.hub-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:128px;height:128px;border-radius:50%;
+  background:var(--void);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:3;
+  box-shadow:0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px var(--line);}
+.cream .hub-center{background:var(--cream);box-shadow:0 8px 32px rgba(5,5,10,0.12), 0 0 0 1px rgba(5,5,10,0.06);}
+.hub-center b{font-family:var(--font-display);font-weight:900;font-size:.85rem;letter-spacing:-0.01em;color:var(--txt);}
+.cream .hub-center b{color:var(--ink);}
+.hub-center span{font-family:var(--font-mono);font-size:8px;color:var(--txt-faint);letter-spacing:.06em;margin-top:2px;text-align:center;}
+.cream .hub-center span{color:var(--ink-faint);}
+.hub-node{position:absolute;width:104px;transform:translate(-50%,-50%);text-align:center;z-index:2;}
+.hub-node .dot{width:44px;height:44px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;
+  background:var(--void-2);color:#fff;box-shadow:0 6px 20px rgba(0,0,0,0.3);border:1px solid var(--line);}
+.cream .hub-node .dot{background:#fff;box-shadow:0 6px 20px rgba(5,5,10,0.14);border-color:rgba(5,5,10,0.08);}
+.hub-node .lbl{font-family:var(--font-mono);font-size:9.5px;font-weight:700;color:var(--txt);line-height:1.3;}
+.cream .hub-node .lbl{color:var(--ink);}
+.hub-svg{position:absolute;inset:0;z-index:1;}
+
+/* ---------- hero console mockup ---------- */
+.console{position:relative;background:var(--void-2);border:1px solid var(--line);border-radius:18px;overflow:hidden;
+  box-shadow:0 30px 80px -20px rgba(26,86,255,0.28), 0 0 0 1px rgba(255,255,255,0.03) inset;}
+.console-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:rgba(5,5,10,0.5);
+  border-bottom:1px solid var(--line);}
+.console-head .l{display:flex;align-items:center;gap:8px;}
+.console-dot{width:7px;height:7px;border-radius:50%;background:var(--blue);box-shadow:0 0 8px var(--blue);}
+.console-title{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;color:var(--txt-soft);}
+.console-tag{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;color:#6d94ff;}
+.console-tabs{display:flex;border-bottom:1px solid var(--line);overflow-x:auto;}
+.console-tabs span{flex:1;padding:10px 8px;text-align:center;font-size:11.5px;font-weight:600;color:var(--txt-faint);
+  border-bottom:2px solid transparent;white-space:nowrap;}
+.console-tabs span.on{color:var(--txt);border-color:var(--blue);background:rgba(26,86,255,0.05);}
+.console-body{padding:16px 18px 18px;}
+.console-row-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.console-row-head .l{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;color:var(--txt-faint);text-transform:uppercase;}
+.console-row-head .r{font-family:var(--font-mono);font-size:10px;color:var(--teal);background:rgba(0,201,167,0.1);
+  border:1px solid rgba(0,201,167,0.25);border-radius:100px;padding:3px 9px;}
+.chead{display:grid;grid-template-columns:1.6fr .8fr 1fr 1.1fr;gap:4px;font-family:var(--font-mono);font-size:9px;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--txt-faint);padding:0 6px 6px;}
+.crow{display:grid;grid-template-columns:1.6fr .8fr 1fr 1.1fr;gap:4px;align-items:center;padding:9px 6px;border-radius:9px;
+  background:rgba(255,255,255,0.02);margin-bottom:5px;font-size:.75rem;}
+.crow .name{font-weight:700;color:var(--txt);}
+.crow .score{font-family:var(--font-mono);font-weight:800;color:#6d94ff;}
+.crow .status{font-family:var(--font-mono);font-size:9.5px;padding:3px 8px;border-radius:100px;justify-self:start;font-weight:700;}
+.console-foot{border-top:1px solid var(--line);padding-top:10px;font-family:var(--font-mono);font-size:10px;color:var(--txt-faint);}
+.console-tabs span{cursor:pointer;}
+.console-panel{display:none;}
+.console-panel.on{display:block;}
+.arow{display:flex;align-items:flex-start;gap:9px;padding:9px 6px;border-radius:9px;background:rgba(255,255,255,0.02);margin-bottom:5px;font-size:.75rem;}
+.arow .n{flex:0 0 18px;height:18px;border-radius:50%;background:rgba(26,86,255,0.16);color:#6d94ff;font-family:var(--font-mono);font-size:9.5px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+.arow .t{color:var(--txt);line-height:1.5;}
+.chat-bubble{border-radius:11px;padding:9px 12px;font-size:.76rem;line-height:1.5;margin-bottom:8px;max-width:88%;}
+.chat-bubble.q{background:rgba(26,86,255,0.14);color:var(--txt);margin-left:auto;}
+.chat-bubble.a{background:rgba(255,255,255,0.04);color:var(--txt-soft);}
+.chat-input{display:flex;align-items:center;gap:8px;border:1px dashed var(--line);border-radius:100px;padding:8px 8px 8px 14px;margin-top:6px;}
+.chat-input span{flex:1;font-size:.72rem;color:var(--txt-faint);}
+.chat-input .go{flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;}
+
+/* ---------- terminal checklist card (roadmap / pricing / swot) ---------- */
+.term{background:var(--void-2);border:1px solid var(--line);border-radius:16px;overflow:hidden;height:100%;display:flex;flex-direction:column;}
+.cream .term{background:#fff;border-color:rgba(5,5,10,0.08);}
+.term-head{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line);background:rgba(255,255,255,0.02);}
+.cream .term-head{border-color:rgba(5,5,10,0.08);}
+.term-dot{width:7px;height:7px;border-radius:50%;}
+.term-title{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;flex:1;}
+.term-count{font-family:var(--font-mono);font-size:9.5px;color:var(--txt-faint);}
+.cream .term-count{color:var(--ink-faint);}
+.term-body{padding:16px;display:flex;flex-direction:column;gap:8px;flex:1;}
+.term-row{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:9px;background:rgba(255,255,255,0.02);
+  border:1px solid var(--line-soft);}
+.cream .term-row{background:rgba(5,5,10,0.02);border-color:rgba(5,5,10,0.05);}
+.term-row .chk{width:16px;height:16px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.term-row .chk.solid{background:currentColor;}
+.term-row .chk.solid svg{width:9px;height:9px;stroke:var(--void);stroke-width:3;}
+.cream .term-row .chk.solid svg{stroke:#fff;}
+.term-row .chk.outline{border:1.5px solid var(--txt-faint);}
+.term-row span.lbl{font-size:.8rem;color:var(--txt-soft);flex:1;}
+.cream .term-row span.lbl{color:var(--ink-soft);}
+.term-row.dim span.lbl{color:var(--txt-faint);}
+.cream .term-row.dim span.lbl{color:var(--ink-faint);}
+.term-price{padding:16px;text-align:center;border-bottom:1px solid var(--line);}
+.cream .term-price{border-color:rgba(5,5,10,0.08);}
+.term-price .amt{font-family:var(--font-display);font-weight:900;font-size:1.5rem;letter-spacing:-0.02em;}
+.term-price .per{font-family:var(--font-mono);font-size:10px;color:var(--txt-faint);margin-top:2px;}
+.cream .term-price .per{color:var(--ink-faint);}
+
+/* ---------- misc ---------- */
+.divider{height:1px;background:var(--line);margin:36px 0;}
+.cream .divider{background:rgba(5,5,10,0.08);}
+.note{border-left:3px solid var(--blue);background:rgba(26,86,255,0.06);border-radius:0 12px 12px 0;padding:15px 20px;
+  font-size:.86rem;color:#6d94ff;margin-top:20px;}
+.cream .note{background:rgba(26,86,255,0.05);color:#1a56ff;}
+.note.critical{border-left-color:var(--red);background:rgba(239,68,68,0.08);color:#ff9494;}
+.cream .note.critical{background:rgba(239,68,68,0.06);color:#c62828;}
+.note.good{border-left-color:var(--teal);background:rgba(0,201,167,0.08);color:#4fe0c4;}
+.cream .note.good{background:rgba(0,201,167,0.06);color:#0aa88b;}
+.checklist{list-style:none;margin:14px 0 0;padding:0;}
+.checklist li{display:flex;gap:10px;padding:8px 0;font-size:.86rem;color:var(--txt-soft);border-bottom:1px solid var(--line);}
+.cream .checklist li{color:var(--ink-soft);border-color:rgba(5,5,10,0.08);}
+.checklist li:last-child{border-bottom:none;}
+.checklist .ck{color:var(--blue);flex:0 0 auto;}
+
+/* ---------- risk/opportunity example cards ---------- */
+.rocard{border-radius:16px;padding:24px;border:1px solid;}
+.rocard.risk{background:rgba(239,68,68,0.06);border-color:rgba(239,68,68,0.25);}
+.rocard.opp{background:rgba(0,201,167,0.06);border-color:rgba(0,201,167,0.25);}
+.rocard .rlabel{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;margin-bottom:10px;display:block;}
+.rocard.risk .rlabel{color:#ff9494;}
+.rocard.opp .rlabel{color:#4fe0c4;}
+.rocard p{margin:0;font-size:.92rem;line-height:1.6;color:var(--txt-soft);}
+.cream .rocard p{color:var(--ink-soft);}
+
+/* ---------- pulse quote ---------- */
+.pulse-quote{max-width:760px;margin:0 auto;text-align:center;}
+.pulse-quote .big{font-family:var(--font-serif);font-style:italic;font-weight:400;font-size:clamp(1.5rem,3vw,2.3rem);
+  line-height:1.4;color:var(--ink);margin:0 0 26px;}
+.pulse-quote p{font-size:1rem;line-height:1.75;color:var(--ink-soft);}
+
+/* ---------- ticker ---------- */
+.ticker-wrap{position:relative;background:var(--void-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  padding:16px 0;overflow:hidden;mask-image:linear-gradient(90deg,transparent,black 8%,black 92%,transparent);}
+.ticker-track{display:flex;width:max-content;animation:tick 32s linear infinite;}
+.ticker-track span{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--txt-faint);padding:0 26px;white-space:nowrap;border-right:1px solid var(--line);}
+@keyframes tick{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
+
+/* ---------- hero ---------- */
+.hero{min-height:94vh;display:flex;align-items:center;padding-top:80px;}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;position:relative;z-index:2;}
+@media (max-width:960px){ .hero-grid{grid-template-columns:1fr;} }
+.hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(2.3rem,5.4vw,4.1rem);line-height:1.04;
+  letter-spacing:-0.03em;margin:0 0 22px;}
+.hero p.sub{font-size:1.05rem;line-height:1.65;color:var(--txt-soft);max-width:520px;margin:0 0 30px;}
+.hero .meta-row{display:flex;gap:26px;flex-wrap:wrap;margin-top:24px;}
+.hero .meta{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--txt-faint);}
+.hero .meta b{display:block;color:var(--txt);font-family:var(--font-body);font-size:13.5px;letter-spacing:0;text-transform:none;
+  margin-top:4px;font-weight:700;}
+.btn{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;
+  padding:14px 26px;border-radius:100px;text-decoration:none;display:inline-block;transition:transform 140ms var(--ease), box-shadow 140ms;}
+.btn-blue{background:var(--blue);color:#fff;}
+.btn-blue:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(26,86,255,0.4);}
+.btn-line{border:1px solid var(--line);color:var(--txt);}
+.btn-line:hover{border-color:var(--blue);}
+.cta-row{display:flex;gap:12px;flex-wrap:wrap;}
+.scroll-cue{position:absolute;bottom:28px;left:32px;display:flex;align-items:center;gap:8px;color:var(--txt-faint);
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;z-index:2;}
+.scroll-cue .ln{width:26px;height:1px;background:var(--blue);}
+
+/* ---------- closing ---------- */
+.closing{background:var(--void);color:var(--txt);padding:130px 0 100px;text-align:center;}
+.closing h2{font-family:var(--font-display);font-size:clamp(2rem,4.4vw,3.3rem);font-weight:900;letter-spacing:-.025em;
+  max-width:740px;margin:0 auto 24px;line-height:1.1;}
+.closing p{max-width:540px;margin:0 auto 36px;color:var(--txt-soft);font-size:1.02rem;line-height:1.65;}
+
+/* ---------- footer ---------- */
+footer.foot{background:var(--void);border-top:1px solid var(--line);padding:64px 0 0;}
+.foot-grid{display:grid;grid-template-columns:1.4fr repeat(4,1fr);gap:32px;padding-bottom:44px;border-bottom:1px solid var(--line);}
+@media (max-width:900px){ .foot-grid{grid-template-columns:repeat(2,1fr);} }
+@media (max-width:560px){ .foot-grid{grid-template-columns:1fr;} }
+.foot-col-title{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt);
+  font-weight:700;margin-bottom:14px;}
+.foot-col ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px;}
+.foot-col a{color:var(--txt-faint);text-decoration:none;font-size:12.5px;}
+.foot-col a:hover{color:var(--txt-soft);}
+.foot-bottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:22px 0;font-family:var(--font-mono);
+  font-size:11px;color:var(--txt-faint);}
+.ghost-word{width:100%;overflow:hidden;position:relative;height:clamp(60px,16vw,220px);}
+.ghost-word span{position:absolute;left:50%;bottom:0;transform:translateX(-50%) translateY(20%);white-space:nowrap;
+  font-family:var(--font-display);font-weight:900;letter-spacing:-0.04em;font-size:clamp(4rem,18vw,18rem);
+  color:rgba(255,255,255,0.04);}
+
+/* ---------- reveal ---------- */
+.reveal{opacity:0;transform:translateY(14px);transition:opacity 560ms var(--ease), transform 560ms var(--ease);}
+.reveal.in{opacity:1;transform:none;}
+
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto;}
+  .reveal{transition:opacity 200ms linear;transform:none;}
+  .ticker-track{animation:none;}
+  *{transition-duration:0.001ms !important; animation-duration:0.001ms !important;}
+}
+
+@media print{
+  #progress,.topbar,#drawer,#drawer-overlay,#jumpctl,.scroll-cue,.ticker-wrap{display:none !important;}
+  body{background:#fff;}
+  .sec{padding:30px 0;page-break-inside:avoid;}
+  .sec.dark{background:#fff;color:#05050a;}
+  .dark .card,.card,.flow-node,.term{background:#fff;border-color:#ddd;color:#05050a;}
+  .lede,.step p,.card p{color:#333 !important;}
+  h1,h2,h3,h4{color:#05050a !important;}
+  .hero{min-height:auto;}
+  a{color:inherit;text-decoration:none;}
+  .ghost-word{display:none;}
+}
+</style>
+</head>
+<body>
+
+<svg style="display:none">
+<symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5z"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.4"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 8.5a3 3 0 1 1 3 3"/><path d="M21.5 20a5.5 5.5 0 0 0-4.4-5.4"/></symbol>
+<symbol id="i-network" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.6"/><circle cx="4" cy="5" r="2"/><circle cx="20" cy="5" r="2"/><circle cx="4" cy="19" r="2"/><circle cx="20" cy="19" r="2"/><path d="M5.7 6.4 10 10.4M18.3 6.4 14 10.4M5.7 17.6 10 13.6M18.3 17.6 14 13.6"/></symbol>
+<symbol id="i-message" viewBox="0 0 24 24"><path d="M4 4h16v12H8l-4 4z"/></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3 2 8l10 5 10-5z"/><path d="M2 13l10 5 10-5"/></symbol>
+<symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></symbol>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10M12 20V4M20 20v-7"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></symbol>
+<symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></symbol>
+<symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 3v18M5 7h14M5 7 3 12h4zM19 7l-2 5h4z"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.6 6 6.4.6-4.8 4.3 1.4 6.3L12 17l-5.6 3.2 1.4-6.3-4.8-4.3L9.4 9z"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></symbol>
+<symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M8.2 12.5 6 21l6-3 6 3-2.2-8.5"/></symbol>
+<symbol id="i-trend" viewBox="0 0 24 24"><path d="M3 17 9 11 13 15 21 7"/><path d="M21 12V7h-5"/></symbol>
+<symbol id="i-trend-down" viewBox="0 0 24 24"><path d="M3 7 9 13 13 9 21 17"/><path d="M21 12v5h-5"/></symbol>
+<symbol id="i-tag" viewBox="0 0 24 24"><path d="M20 10 12 2H4v8l8 8z"/><circle cx="7.5" cy="6.5" r="1.2"/></symbol>
+<symbol id="i-inbox" viewBox="0 0 24 24"><path d="M4 12h4l2 3h4l2-3h4"/><rect x="3" y="5" width="18" height="14" rx="2"/></symbol>
+<symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-10-9C.3 8 1.6 4 5.5 4 8 4 10 5.5 12 8c2-2.5 4-4 6.5-4 3.9 0 5.2 4 3.5 8-2.5 4.4-10 9-10 9z"/></symbol>
+</svg>
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <a href="#cover" class="brand">
+    <span class="brand-mark"></span>
+    <span class="brand-word">NABDHA AI</span>
+    <span class="brand-sub">Platform Presentation</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#solution">Solution</a></li>
+    <li><a href="#mvp">MVP</a></li>
+    <li><a href="#swot">SWOT</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#decisions">Decisions</a></li>
+  </ul>
+  <button class="nav-cta" id="drawerBtn">Sections · 27</button>
+</header>
+
+<div id="drawer-overlay"></div>
+<nav id="drawer">
+  <button class="drawer-close" id="drawerClose">&times;</button>
+  <div class="drawer-group">Foundation</div>
+  <ul class="drawer-list">
+    <li><a href="#cover" data-n="00"><span class="num">00</span>Opening Statement</a></li>
+    <li><a href="#problem" data-n="01"><span class="num">01</span>The Problem</a></li>
+    <li><a href="#solution" data-n="02"><span class="num">02</span>The Nabdha Solution</a></li>
+    <li><a href="#questions" data-n="03"><span class="num">03</span>Four Key Questions</a></li>
+    <li><a href="#functions" data-n="04"><span class="num">04</span>Core Functions</a></li>
+  </ul>
+  <div class="drawer-group">How It Works</div>
+  <ul class="drawer-list">
+    <li><a href="#mvp" data-n="05"><span class="num">05</span>The MVP</a></li>
+    <li><a href="#advantage" data-n="06"><span class="num">06</span>Core Advantage</a></li>
+    <li><a href="#vision" data-n="07"><span class="num">07</span>Future Vision</a></li>
+    <li><a href="#risks" data-n="08"><span class="num">08</span>Risks Detected</a></li>
+    <li><a href="#opportunities" data-n="09"><span class="num">09</span>Opportunities Detected</a></li>
+    <li><a href="#example" data-n="10"><span class="num">10</span>Real-World Example</a></li>
+    <li><a href="#example-plan" data-n="11"><span class="num">11</span>Example — The Plan</a></li>
+  </ul>
+  <div class="drawer-group">Brand &amp; Market</div>
+  <ul class="drawer-list">
+    <li><a href="#meaning" data-n="12"><span class="num">12</span>The Meaning of Nabdha</a></li>
+    <li><a href="#swot" data-n="13"><span class="num">13</span>SWOT — Strengths &amp; Weaknesses</a></li>
+    <li><a href="#swot-2" data-n="14"><span class="num">14</span>SWOT — Opportunities &amp; Threats</a></li>
+    <li><a href="#competitors" data-n="15"><span class="num">15</span>Competitor Analysis</a></li>
+    <li><a href="#positioning" data-n="16"><span class="num">16</span>Positioning</a></li>
+  </ul>
+  <div class="drawer-group">Business Model</div>
+  <ul class="drawer-list">
+    <li><a href="#revenue-streams" data-n="17"><span class="num">17</span>Revenue Streams — Overview</a></li>
+    <li><a href="#revenue-streams-detail" data-n="18"><span class="num">18</span>Revenue Streams — Detail</a></li>
+    <li><a href="#pricing" data-n="19"><span class="num">19</span>Pricing Plans</a></li>
+    <li><a href="#revenue-structure" data-n="20"><span class="num">20</span>Revenue Structure</a></li>
+    <li><a href="#journey" data-n="21"><span class="num">21</span>Customer Revenue Journey</a></li>
+    <li><a href="#onboarding" data-n="22"><span class="num">22</span>User Onboarding Flow</a></li>
+  </ul>
+  <div class="drawer-group">Scope &amp; Next Steps</div>
+  <ul class="drawer-list">
+    <li><a href="#decisions" data-n="23"><span class="num">23</span>Open Questions — Product &amp; Data</a></li>
+    <li><a href="#decisions-2" data-n="24"><span class="num">24</span>Open Questions — Market &amp; Model</a></li>
+    <li><a href="#next" data-n="25"><span class="num">25</span>Next Steps</a></li>
+    <li><a href="#closing" data-n="26"><span class="num">26</span>Closing Vision</a></li>
+  </ul>
+</nav>
+
+<div id="jumpctl">
+  <button class="jumpbtn" id="jumpUp" aria-label="Previous section">&uarr;</button>
+  <button class="jumpbtn" id="jumpDown" aria-label="Next section">&darr;</button>
+</div>
+
+<main>
+
+<!-- 00 HERO -->
+<section class="sec dark hero" id="cover">
+  <div class="blob" style="width:640px;height:640px;top:-220px;right:-200px;background:radial-gradient(circle,rgba(26,86,255,0.28),transparent 70%);"></div>
+  <div class="blob" style="width:480px;height:480px;bottom:-180px;left:-160px;background:radial-gradient(circle,rgba(0,201,167,0.14),transparent 70%);"></div>
+  <div class="wrap hero-grid">
+    <div>
+      <p class="eyebrow">Nabdha AI · Business Intelligence Platform</p>
+      <h1>The smart <em>brain</em> for small and medium enterprises.</h1>
+      <p class="sub">Nabdha AI turns daily operational data — sales, inventory, customers, expenses, payments, orders and delivery — into clear insight and practical, actionable decisions. Not another dashboard. A decision layer.</p>
+      <div class="cta-row">
+        <a href="#solution" class="btn btn-blue">Explore the Platform</a>
+        <a href="#decisions" class="btn btn-line">Open Questions</a>
+      </div>
+      <div class="meta-row">
+        <div class="meta">Prepared for<b>Nabdha AI</b></div>
+        <div class="meta">Document type<b>Platform Presentation</b></div>
+        <div class="meta">Stage<b>Pre-financial proposal</b></div>
+      </div>
+    </div>
+    <div class="console reveal">
+      <div class="console-head">
+        <div class="l"><span class="console-dot"></span><span class="console-title">NABDHA AI</span></div>
+        <span class="console-tag">BUSINESS INTELLIGENCE REPORT</span>
+      </div>
+      <div class="console-tabs">
+        <span class="on" data-tab="risks">Risks</span><span data-tab="opportunities">Opportunities</span><span data-tab="action">Action Plan</span><span data-tab="advisor">Advisor</span>
+      </div>
+      <div class="console-body">
+        <div class="console-panel on" data-panel="risks">
+          <div class="console-row-head"><span class="l">Detected This Week</span><span class="r">2 risks</span></div>
+          <div class="chead"><span>Signal</span><span>Type</span><span>Confidence</span><span>Suggested Action</span></div>
+          <div class="crow"><span class="name">Product A — low stock</span><span>Risk</span><span class="score">High</span><span class="status" style="background:rgba(245,158,11,0.12);color:#ffc266;">Reorder now</span></div>
+          <div class="crow"><span class="name">12 customers gone quiet</span><span>Risk</span><span class="score">Medium</span><span class="status" style="background:rgba(245,158,11,0.12);color:#ffc266;">Re-engage</span></div>
+          <div class="console-foot">Illustrative example, based on Nabdha's own simplified scenario — see §10</div>
+        </div>
+        <div class="console-panel" data-panel="opportunities">
+          <div class="console-row-head"><span class="l">Detected This Week</span><span class="r">2 opportunities</span></div>
+          <div class="chead"><span>Signal</span><span>Type</span><span>Confidence</span><span>Suggested Action</span></div>
+          <div class="crow"><span class="name">Product B — rising demand</span><span>Opportunity</span><span class="score">High</span><span class="status" style="background:rgba(0,201,167,0.12);color:#4fe0c4;">Increase stock</span></div>
+          <div class="crow"><span class="name">B + C bundle potential</span><span>Opportunity</span><span class="score">Medium</span><span class="status" style="background:rgba(0,201,167,0.12);color:#4fe0c4;">Test offer</span></div>
+          <div class="console-foot">Illustrative example, based on Nabdha's own simplified scenario — see §10</div>
+        </div>
+        <div class="console-panel" data-panel="action">
+          <div class="console-row-head"><span class="l">Suggested Actions</span><span class="r">4 steps</span></div>
+          <div class="arow"><span class="n">1</span><span class="t">Review Product A stock &amp; place an urgent supply order</span></div>
+          <div class="arow"><span class="n">2</span><span class="t">Set a safety stock level so this doesn't recur</span></div>
+          <div class="arow"><span class="n">3</span><span class="t">Increase Product B visibility in marketing campaigns</span></div>
+          <div class="arow"><span class="n">4</span><span class="t">Test a bundle offer combining Product B with Product C</span></div>
+          <div class="console-foot">From the full report — see §10 for the complete plan</div>
+        </div>
+        <div class="console-panel" data-panel="advisor">
+          <div class="console-row-head"><span class="l">Smart Business Advisor</span><span class="r">natural language</span></div>
+          <div class="chat-bubble q">Why did Product A almost run out?</div>
+          <div class="chat-bubble a">Demand grew 34% over the last 3 weeks while the reorder point stayed fixed — the trigger fired too late. Recommend raising the safety stock level.</div>
+          <div class="chat-input"><span>Ask a question about your business...</span><span class="go">→</span></div>
+          <div class="console-foot">MVP — simplified assistant, see §04</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-cue"><span class="ln"></span><span>Scroll to explore</span></div>
+</section>
+
+<div class="ticker-wrap">
+  <div class="ticker-track">
+    <span>AI Business Intelligence</span><span>Decision Intelligence</span><span>SME-Focused</span><span>Arabic-First Interface</span>
+    <span>SaaS Platform</span><span>Data → Insight → Decision</span><span>Early Risk Detection</span><span>Growth Opportunity Discovery</span>
+    <span>AI Business Intelligence</span><span>Decision Intelligence</span><span>SME-Focused</span><span>Arabic-First Interface</span>
+    <span>SaaS Platform</span><span>Data → Insight → Decision</span><span>Early Risk Detection</span><span>Growth Opportunity Discovery</span>
+  </div>
+</div>
+
+<!-- 01 PROBLEM -->
+<section class="sec cream" id="problem">
+  <div class="wrap">
+    <span class="sec-index">01 / 26</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">The Market Problem</p>
+      <h2 class="headline">Having the data is not the same as benefiting from it.</h2>
+      <p class="lede">Businesses rely on data spread across sales, inventory, customers, expenses, payments, orders and delivery. Business owners often struggle to know what is actually happening, why it is happening, what might happen next, and what to do about it.</p>
+    </div>
+    <div class="grid grid-3 reveal">
+      <div class="card top-accent border-blue"><div class="icon bg-blue accent-blue"><svg class="ic"><use href="#i-search"/></svg></div>
+        <h4>What's actually happening?</h4><p>Data lives scattered across systems — the owner rarely has one clear picture of the business's real state.</p></div>
+      <div class="card top-accent border-amber"><div class="icon bg-amber accent-amber"><svg class="ic"><use href="#i-chart"/></svg></div>
+        <h4>Dashboards show numbers, not decisions</h4><p>Traditional reporting tools display what happened — they stop short of explaining why, or what to do next.</p></div>
+      <div class="card top-accent border-red"><div class="icon bg-red accent-red"><svg class="ic"><use href="#i-clock"/></svg></div>
+        <h4>Problems are found too late</h4><p>Without continuous analysis, risks like stockouts, cash flow pressure, or customer loss surface only after they've already cost money.</p></div>
+    </div>
+    <div class="statline reveal">
+      <div class="stat"><div class="n">~1.3M</div><div class="l">SMEs in Saudi Arabia</div></div>
+      <div class="stat"><div class="n">570K+</div><div class="l">SMEs in Riyadh alone — 43.7%</div></div>
+      <div class="stat"><div class="n">34,600+</div><div class="l">Live Salla + Zid stores to connect to</div></div>
+      <div class="stat"><div class="n">SAR 375K</div><div class="l">ZATCA e-invoicing threshold — clean digital data now the norm</div></div>
+    </div>
+    <p class="tag-example" style="display:block;margin-top:14px;font-family:var(--font-mono);font-size:10px;">Sources: Qoyod SME Report 2026 · SPA/Monsha'at · StoreLeads · ZATCA Phase 2 Wave 24</p>
+  </div>
+</section>
+
+<!-- 02 SOLUTION -->
+<section class="sec dark" id="solution">
+  <div class="wrap">
+    <span class="sec-index">02 / 26</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">The Nabdha AI Solution</p>
+      <h2 class="headline">An intelligence layer that reads the <em>pulse</em> of the business.</h2>
+      <p class="lede">Nabdha receives data from different sources, then cleans, analyzes and connects it to uncover patterns, trends, abnormal changes, risks and opportunities — turning the results into simplified information and practical recommendations.</p>
+    </div>
+    <div class="flow reveal">
+      <div class="flow-node"><div class="t">Data</div><div class="d">Sales, inventory, customers, expenses, orders, delivery</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">AI Analysis</div><div class="d">Cleans, connects and analyzes the data</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Insights</div><div class="d">Patterns, trends, abnormal changes</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Prediction</div><div class="d">What might happen next</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Recommendations</div><div class="d">What the owner should do now</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Action</div><div class="d">A practical plan the owner can execute</div></div>
+    </div>
+    <div class="pill-group reveal" style="margin-top:36px;">
+      <div class="pill-group-head"><span class="pill-dot" style="background:var(--blue);"></span><span class="pill-group-label">MVP — how data gets in</span><span class="tag tag-mvp" style="margin-left:2px;">MVP</span><span class="pill-group-line"></span></div>
+      <div class="pill-row">
+        <span class="pill" style="border-color:rgba(26,86,255,0.3);color:#6d94ff;">Excel (.xlsx)</span>
+        <span class="pill" style="border-color:rgba(26,86,255,0.3);color:#6d94ff;">CSV</span>
+        <span class="pill" style="border-color:rgba(26,86,255,0.3);color:#6d94ff;">PDF</span>
+      </div>
+    </div>
+    <div class="pill-group reveal" style="margin-top:22px;">
+      <div class="pill-group-head"><span class="pill-dot" style="background:var(--purple);"></span><span class="pill-group-label">Direct system integrations</span><span class="tag tag-future" style="margin-left:2px;">Future phase</span><span class="pill-group-line"></span></div>
+      <div class="pill-row">
+        <span class="pill" style="border-color:rgba(0,201,167,0.3);color:#4fe0c4;">Salla</span>
+        <span class="pill" style="border-color:rgba(0,201,167,0.3);color:#4fe0c4;">Zid</span>
+        <span class="pill" style="border-color:rgba(0,201,167,0.3);color:#4fe0c4;">Shopify</span>
+        <span class="pill" style="border-color:rgba(0,201,167,0.3);color:#4fe0c4;">WooCommerce</span>
+        <span class="pill" style="border-color:rgba(245,158,11,0.3);color:#ffc266;">Foodics</span>
+        <span class="pill" style="border-color:rgba(245,158,11,0.3);color:#ffc266;">Odoo</span>
+        <span class="pill" style="border-color:rgba(245,158,11,0.3);color:#ffc266;">Rewaa</span>
+        <span class="pill" style="border-color:rgba(139,92,246,0.3);color:#b39bfb;">Qoyod</span>
+        <span class="pill" style="border-color:rgba(139,92,246,0.3);color:#b39bfb;">Daftra</span>
+        <span class="pill" style="border-color:rgba(139,92,246,0.3);color:#b39bfb;">Zoho Books</span>
+        <span class="pill" style="border-color:rgba(236,72,153,0.3);color:#ff9ac4;">Salesforce / Dynamics 365 <span class="tag tag-future" style="margin-left:4px;">Enterprise tier</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 FOUR KEY QUESTIONS -->
+<section class="sec cream" id="questions">
+  <div class="wrap">
+    <span class="sec-index">03 / 26</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Four Key Questions</p>
+      <h2 class="headline">Instead of just showing that something changed, Nabdha answers <em>why</em> — and what to do.</h2>
+    </div>
+    <div class="grid grid-4 reveal">
+      <div class="card top-accent border-blue"><div class="eyebrow" style="margin-bottom:10px;">01</div><h4>What is happening?</h4><p>The current, connected picture of the business's performance.</p></div>
+      <div class="card top-accent border-teal"><div class="eyebrow" style="margin-bottom:10px;color:#0aa88b;">02</div><h4>Why is it happening?</h4><p>The drivers behind the pattern — not just the number.</p></div>
+      <div class="card top-accent border-purple"><div class="eyebrow" style="margin-bottom:10px;color:#7c4ee8;">03</div><h4>What might happen next?</h4><p>A forward-looking read of where the trend is heading.</p></div>
+      <div class="card top-accent border-amber"><div class="eyebrow" style="margin-bottom:10px;color:#c9790a;">04</div><h4>What should I do now?</h4><p>A concrete, practical recommendation the owner can act on.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 CORE FUNCTIONS -->
+<section class="sec dark" id="functions">
+  <div class="wrap">
+    <span class="sec-index">04 / 26</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Core Functions</p>
+      <h2 class="headline">Seven analytical capabilities, one connected picture.</h2>
+    </div>
+    <div class="grid grid-3 reveal">
+      <div class="card top-accent border-blue"><div class="icon bg-blue accent-blue"><svg class="ic"><use href="#i-trend"/></svg></div>
+        <h4>Sales analysis &amp; forecasting</h4><p>Detects sales trends and helps forecast future demand.</p></div>
+      <div class="card top-accent border-teal"><div class="icon bg-teal accent-teal"><svg class="ic"><use href="#i-layers"/></svg></div>
+        <h4>Inventory intelligence</h4><p>Identifies the likelihood of stockouts or overstock and helps plan reorders.</p></div>
+      <div class="card top-accent border-purple"><div class="icon bg-purple accent-purple"><svg class="ic"><use href="#i-clock"/></svg></div>
+        <h4>Cash flow analysis</h4><p>Monitors indicators that may affect future liquidity.</p></div>
+      <div class="card top-accent border-amber"><div class="icon bg-amber accent-amber"><svg class="ic"><use href="#i-users"/></svg></div>
+        <h4>Customer analysis</h4><p>Identifies the highest-value customers and segments, and understands purchase and repeat patterns.</p></div>
+      <div class="card top-accent border-pink"><div class="icon bg-pink accent-pink"><svg class="ic"><use href="#i-globe"/></svg></div>
+        <h4>Delivery &amp; operations analysis</h4><p>Discovers opportunities to improve efficiency and reduce certain operating costs.</p></div>
+      <div class="card top-accent border-red"><div class="icon bg-red accent-red"><svg class="ic"><use href="#i-star"/></svg></div>
+        <h4>Growth opportunity discovery</h4><p>Identifies the products, segments or periods with potential to increase revenue.</p></div>
+      <div class="card top-accent border-blue"><div class="icon bg-blue accent-blue"><svg class="ic"><use href="#i-message"/></svg></div>
+        <h4>Smart business advisor</h4><p>Lets business owners ask questions in natural language and get answers based on their own business data.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 MVP -->
+<section class="sec cream" id="mvp">
+  <div class="wrap">
+    <span class="sec-index">05 / 26</span>
+    <div style="margin-bottom:20px;"><span class="tag tag-mvp">MVP</span></div>
+    <div class="section-head reveal">
+      <p class="eyebrow">The MVP</p>
+      <h2 class="headline">Enter data. Get a <em>Business Intelligence Report</em>.</h2>
+      <p class="lede">The business owner enters their data, Nabdha analyzes it, and the owner receives a report — not a dashboard full of numbers, but outputs that move the owner from understanding to deciding.</p>
+    </div>
+    <div class="flow reveal">
+      <div class="flow-node"><div class="t">Owner enters data</div><div class="d">Excel, CSV or PDF upload — direct system integrations come later</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Nabdha analyzes</div><div class="d">Cleans, connects, and interprets the data</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Business Intelligence Report</div><div class="d">Risks, opportunities, and an action plan</div></div>
+    </div>
+    <div class="grid grid-4 reveal" style="margin-top:32px;">
+      <div class="card top-accent border-red"><div class="icon bg-red accent-red"><svg class="ic"><use href="#i-shield"/></svg></div>
+        <h4>Key Risks</h4><p>Issues that deserve the business owner's attention.</p></div>
+      <div class="card top-accent border-teal"><div class="icon bg-teal accent-teal"><svg class="ic"><use href="#i-trend"/></svg></div>
+        <h4>Growth Opportunities</h4><p>Potential opportunities identified directly from the data.</p></div>
+      <div class="card top-accent border-purple"><div class="icon bg-purple accent-purple"><svg class="ic"><use href="#i-clock"/></svg></div>
+        <h4>30-Day Forecast</h4><p>Expected sales trend and revenue range for the next 30 days.</p></div>
+      <div class="card top-accent border-blue"><div class="icon bg-blue accent-blue"><svg class="ic"><use href="#i-check"/></svg></div>
+        <h4>Action Plan</h4><p>A set of suggested actions to address the risks and seize the opportunities.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 CORE ADVANTAGE -->
+<section class="sec dark" id="advantage">
+  <div class="wrap">
+    <span class="sec-index">06 / 26</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">The Core Advantage</p>
+      <h2 class="headline">Decision Intelligence, not just reporting.</h2>
+      <p class="lede">Nabdha differs from traditional reporting tools, which mainly display data and explain what happened. It goes further — into why it happened, what could happen next, and what to do.</p>
+    </div>
+    <div class="blind reveal">
+      <div class="blind-card"><svg class="ic accent-amber" style="width:22px;height:22px;margin:0 auto 8px;"><use href="#i-chart"/></svg><div style="font-family:var(--font-display);font-weight:800;">Traditional reporting</div><div style="font-size:.76rem;color:var(--txt-faint);margin-top:4px;">"What happened?" — stops here</div></div>
+      <div class="blind-mid">Nabdha goes<br>further<br>↓</div>
+      <div class="blind-card"><svg class="ic accent-teal" style="width:22px;height:22px;margin:0 auto 8px;"><use href="#i-zap"/></svg><div style="font-family:var(--font-display);font-weight:800;">Decision Intelligence</div><div style="font-size:.76rem;color:var(--txt-faint);margin-top:4px;">Why · What next · What to do</div></div>
+    </div>
+    <div class="note good reveal"><b>Code calculates. AI explains.</b> Every number in a Nabdha report — growth rate, stock-out date, cash forecast — is produced by code running directly on the owner's data. The AI layer only ranks, explains and writes the action plan. It never invents a figure. This is the guardrail against the biggest trust risk for any AI reporting product.</div>
+  </div>
+</section>
+
+<!-- 07 FUTURE VISION / ROADMAP -->
+<section class="sec cream" id="vision">
+  <div class="wrap">
+    <span class="sec-index">07 / 26</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Future Vision</p>
+      <h2 class="headline">From a data analysis tool to a continuous <em>AI Business Advisor</em>.</h2>
+      <p class="lede">As the platform develops, it can move from analysis to prediction, then to recommendation, then to helping execute decisions and measure their impact. <span class="tag tag-assumption">Illustrative dates, based on a 4 Oct 2026 kickoff</span></p>
+    </div>
+    <div class="grid grid-3 reveal">
+      <div class="term">
+        <div class="term-head"><span class="term-dot" style="background:var(--blue);"></span><span class="term-title" style="color:#1a56ff;">Discovery + MVP Build</span><span class="term-count">17 weeks</span></div>
+        <div class="term-body">
+          <div class="term-row"><span class="chk solid" style="color:var(--blue);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">3wk discovery — owner interviews, real datasets, signal list</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--blue);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">14wk build — Excel/CSV/PDF upload, ~20 signals</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--blue);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">AI report, Arabic + English, web + PDF</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--blue);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Ends ~28 Jan 2027</span></div>
+        </div>
+      </div>
+      <div class="term">
+        <div class="term-head"><span class="term-dot" style="background:var(--amber);"></span><span class="term-title" style="color:#c9790a;">Pilot + Paid Launch</span><span class="term-count">8 weeks</span></div>
+        <div class="term-body">
+          <div class="term-row dim"><span class="chk outline"></span><span class="lbl">10–15 businesses on Free Business Diagnostic</span></div>
+          <div class="term-row dim"><span class="chk outline"></span><span class="lbl">5 converted to a paid pilot, accuracy scored</span></div>
+          <div class="term-row dim"><span class="chk outline"></span><span class="lbl">Basic &amp; Growth plans go live ~4 Apr 2027</span></div>
+        </div>
+      </div>
+      <div class="term">
+        <div class="term-head"><span class="term-dot" style="background:var(--purple);"></span><span class="term-title" style="color:#7c4ee8;">Platform v2 + Advisor</span><span class="term-count">by end 2027</span></div>
+        <div class="term-body">
+          <div class="term-row dim"><span class="chk outline"></span><span class="lbl">Live dashboard, WhatsApp/email alerts — by Jul 2027</span></div>
+          <div class="term-row dim"><span class="chk outline"></span><span class="lbl">"Ask Nabdha" chat advisor, multi-branch</span></div>
+          <div class="term-row dim"><span class="chk outline"></span><span class="lbl">Expert marketplace, enterprise plan — by Dec 2027</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="lede reveal" style="margin-top:22px;font-size:.86rem;">Built as a multi-tenant SaaS platform with security and data isolation by design from day one — not a one-off dashboard, so it scales from SME to enterprise without a rebuild.</p>
+  </div>
+</section>
+
+<!-- 08 RISKS -->
+<section class="sec dark" id="risks">
+  <div class="wrap">
+    <span class="sec-index">08 / 26</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Examples of Risks Nabdha Can Detect</p>
+      <h2 class="headline">Early warning, before it costs money.</h2>
+    </div>
+    <div class="grid grid-4 reveal">
+      <div class="card mini top-accent border-red"><div class="icon bg-red accent-red"><svg class="ic"><use href="#i-inbox"/></svg></div><h4>Stockouts</h4><p>A fast-selling product may run out before the next supply arrives.</p></div>
+      <div class="card mini top-accent border-red"><div class="icon bg-red accent-red"><svg class="ic"><use href="#i-layers"/></svg></div><h4>Overstock</h4><p>Slow-selling products with high stock levels tying up capital.</p></div>
+      <div class="card mini top-accent border-red"><div class="icon bg-red accent-red"><svg class="ic"><use href="#i-trend-down"/></svg></div><h4>Declining Sales</h4><p>Sales of a product, branch or business line steadily declining.</p></div>
+      <div class="card mini top-accent border-red"><div class="icon bg-red accent-red"><svg class="ic"><use href="#i-scale"/></svg></div><h4>Declining Profits</h4><p>Good sales, but falling profits from rising costs or shrinking margins.</p></div>
+      <div class="card mini top-accent border-red"><div class="icon bg-red accent-red"><svg class="ic"><use href="#i-chart"/></svg></div><h4>Rising Expenses</h4><p>Expenses rising faster than revenue.</p></div>
+      <div class="card mini top-accent border-red"><div class="icon bg-red accent-red"><svg class="ic"><use href="#i-clock"/></svg></div><h4>Cash Flow Problems</h4><p>Incoming cash may not cover upcoming payments and expenses.</p></div>
+      <div class="card mini top-accent border-red"><div class="icon bg-red accent-red"><svg class="ic"><use href="#i-users"/></svg></div><h4>Customer Loss</h4><p>Regular customers who have started to stop buying.</p></div>
+      <div class="card mini top-accent border-red"><div class="icon bg-red accent-red"><svg class="ic"><use href="#i-network"/></svg></div><h4>Lower Purchase Frequency</h4><p>Customers returning to buy less often than before.</p></div>
+      <div class="card mini top-accent border-red"><div class="icon bg-red accent-red"><svg class="ic"><use href="#i-globe"/></svg></div><h4>Rising Delivery Costs</h4><p>Rising delivery cost eating into order profitability.</p></div>
+      <div class="card mini top-accent border-red"><div class="icon bg-red accent-red"><svg class="ic"><use href="#i-tag"/></svg></div><h4>Declining Product Performance</h4><p>A product that used to sell well losing demand.</p></div>
+      <div class="card mini top-accent border-red"><div class="icon bg-red accent-red"><svg class="ic"><use href="#i-zap"/></svg></div><h4>Single-Product Reliance</h4><p>A large share of revenue depending on one product.</p></div>
+      <div class="card mini top-accent border-red"><div class="icon bg-red accent-red"><svg class="ic"><use href="#i-users"/></svg></div><h4>Customer Concentration</h4><p>A large share of revenue from a small number of customers.</p></div>
+      <div class="card mini top-accent border-red"><div class="icon bg-red accent-red"><svg class="ic"><use href="#i-trend-down"/></svg></div><h4>Slowing Growth</h4><p>Sales or customer growth slowing versus previous periods.</p></div>
+      <div class="card mini top-accent border-red"><div class="icon bg-red accent-red"><svg class="ic"><use href="#i-globe"/></svg></div><h4>Delivery Problems</h4><p>Rising delivery time or order costs affecting satisfaction.</p></div>
+      <div class="card mini top-accent border-red"><div class="icon bg-red accent-red"><svg class="ic"><use href="#i-search"/></svg></div><h4>Abnormal Change</h4><p>A sudden, unusual change in sales, expenses or orders worth checking.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 09 OPPORTUNITIES -->
+<section class="sec cream" id="opportunities">
+  <div class="wrap">
+    <span class="sec-index">09 / 26</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Examples of Growth Opportunities Nabdha Can Detect</p>
+      <h2 class="headline">Not just risk — the upside, surfaced early too.</h2>
+    </div>
+    <div class="grid grid-4 reveal">
+      <div class="card mini top-accent border-teal"><div class="icon bg-teal accent-teal"><svg class="ic"><use href="#i-trend"/></svg></div><h4>Growing-Demand Product</h4><p>Rising demand for a product — opportunity to increase stock and promote it.</p></div>
+      <div class="card mini top-accent border-teal"><div class="icon bg-teal accent-teal"><svg class="ic"><use href="#i-star"/></svg></div><h4>Profitable Product to Focus On</h4><p>A good margin product worth focusing more effort on.</p></div>
+      <div class="card mini top-accent border-teal"><div class="icon bg-teal accent-teal"><svg class="ic"><use href="#i-layers"/></svg></div><h4>Cross-Sell / Bundle Opportunity</h4><p>Products frequently bought together, ready for a bundle offer.</p></div>
+      <div class="card mini top-accent border-teal"><div class="icon bg-teal accent-teal"><svg class="ic"><use href="#i-users"/></svg></div><h4>High-Value Customers</h4><p>Frequent, higher-spending customers worth special deals.</p></div>
+      <div class="card mini top-accent border-teal"><div class="icon bg-teal accent-teal"><svg class="ic"><use href="#i-clock"/></svg></div><h4>Increase Repeat Purchases</h4><p>One-time buyers who can be targeted to buy again.</p></div>
+      <div class="card mini top-accent border-teal"><div class="icon bg-teal accent-teal"><svg class="ic"><use href="#i-network"/></svg></div><h4>New Segment to Target</h4><p>A group with similar buying behavior worth targeted offers.</p></div>
+      <div class="card mini top-accent border-teal"><div class="icon bg-teal accent-teal"><svg class="ic"><use href="#i-clock"/></svg></div><h4>Seasonal Opportunity</h4><p>Demand rising at certain times — prepare in advance.</p></div>
+      <div class="card mini top-accent border-teal"><div class="icon bg-teal accent-teal"><svg class="ic"><use href="#i-globe"/></svg></div><h4>Regional Opportunity</h4><p>High demand for certain products in a specific region.</p></div>
+      <div class="card mini top-accent border-teal"><div class="icon bg-teal accent-teal"><svg class="ic"><use href="#i-scale"/></svg></div><h4>Pricing Improvement</h4><p>Products that can be repriced to improve margin without losing demand.</p></div>
+      <div class="card mini top-accent border-teal"><div class="icon bg-teal accent-teal"><svg class="ic"><use href="#i-search"/></svg></div><h4>Underused Product</h4><p>Good reviews and margin, but not enough visibility or sales.</p></div>
+      <div class="card mini top-accent border-teal"><div class="icon bg-teal accent-teal"><svg class="ic"><use href="#i-zap"/></svg></div><h4>Increase Sales from Existing Customers</h4><p>Existing customers with potential to buy additional products.</p></div>
+      <div class="card mini top-accent border-teal"><div class="icon bg-teal accent-teal"><svg class="ic"><use href="#i-tag"/></svg></div><h4>Improve Offers</h4><p>Analyzing past offers to find what gets the best response.</p></div>
+      <div class="card mini top-accent border-teal"><div class="icon bg-teal accent-teal"><svg class="ic"><use href="#i-chart"/></svg></div><h4>Reduce Operating Costs</h4><p>A delivery or operating method costing more than the alternatives.</p></div>
+      <div class="card mini top-accent border-teal"><div class="icon bg-teal accent-teal"><svg class="ic"><use href="#i-award"/></svg></div><h4>Expand a Successful Product</h4><p>A steadily growing product or service worth expanding.</p></div>
+      <div class="card mini top-accent border-teal"><div class="icon bg-teal accent-teal"><svg class="ic"><use href="#i-star"/></svg></div><h4>New Behavior Trend</h4><p>A shift in demand, spotted and capitalized on early.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 REAL-WORLD EXAMPLE -->
+<section class="sec dark" id="example">
+  <div class="wrap">
+    <span class="sec-index">10 / 26</span>
+    <div style="margin-bottom:20px;"><span class="tag tag-example">Simplified example, from Nabdha's own brief</span></div>
+    <div class="section-head reveal">
+      <p class="eyebrow">A Simplified Real-World Example</p>
+      <h2 class="headline">One store's data — one risk, one opportunity, one plan.</h2>
+      <p class="lede">Suppose Nabdha analyzed an online store's data and discovered the following.</p>
+    </div>
+    <div class="grid grid-2 reveal">
+      <div class="rocard risk"><span class="rlabel">🔴 The Risk</span><p>Stock of Product A may run out within 7 days, while the supply lead time is 10 days.</p></div>
+      <div class="rocard opp"><span class="rlabel">🟢 The Opportunity</span><p>Demand for Product B has been rising steadily, and customers who buy B often buy Product C with it.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 10b REAL-WORLD EXAMPLE — THE PLAN -->
+<section class="sec dark" id="example-plan">
+  <div class="wrap">
+    <span class="sec-index">11 / 26</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">A Simplified Real-World Example</p>
+      <h2 class="headline">From signal to a tracked, measured plan.</h2>
+    </div>
+    <h3 class="subhead reveal">Suggested Action Plan</h3>
+    <div class="grid grid-2 reveal">
+      <div class="card top-accent border-red"><h4>1. Address the Risk — Product A</h4>
+        <ul class="checklist">
+          <li><span class="ck">✓</span>Review current stock</li>
+          <li><span class="ck">✓</span>Place an urgent supply order</li>
+          <li><span class="ck">✓</span>Set a safety stock level to avoid recurrence</li>
+          <li><span class="ck">✓</span>Track sales daily until supply arrives</li>
+        </ul></div>
+      <div class="card top-accent border-teal"><h4>2. Seize the Opportunity — Product B</h4>
+        <ul class="checklist">
+          <li><span class="ck">✓</span>Increase availability of Product B</li>
+          <li><span class="ck">✓</span>Increase its visibility in marketing campaigns</li>
+          <li><span class="ck">✓</span>Test a bundle offer combining Product B with Product C</li>
+          <li><span class="ck">✓</span>Track the offer's results and sales rate</li>
+        </ul></div>
+    </div>
+
+    <h3 class="subhead reveal" style="margin-top:44px;">Follow-Up &amp; Impact Measurement</h3>
+    <ul class="checklist reveal" style="max-width:680px;">
+      <li><span class="ck">✓</span>Monitor stock levels</li>
+      <li><span class="ck">✓</span>Track sales of Product B and Product C</li>
+      <li><span class="ck">✓</span>Compare results before and after the actions are taken</li>
+      <li><span class="ck">✓</span>Update recommendations based on the new data</li>
+    </ul>
+    <div class="note good reveal"><b>Expected Outcome:</b> Reduced risk of losing sales due to Product A running out, while capitalizing on rising demand for Product B to increase sales and take advantage of the cross-selling opportunity.</div>
+  </div>
+</section>
+
+<!-- 11 MEANING OF NABDHA -->
+<section class="sec cream" id="meaning">
+  <div class="wrap">
+    <span class="sec-index">12 / 26</span>
+    <div class="pulse-quote reveal">
+      <p class="big">We chose the name "Nabdha" — Arabic for "pulse" — because every business has a pulse, and that pulse lives in its daily data.</p>
+      <p>Sales, inventory, customers, expenses and orders all give us signals about the health of the business. Nabdha AI reads these signals, detects changes, risks and opportunities, and turns them into actionable decisions. "Nabdha" is not just a name — it represents the pulse of the business, which we monitor, understand, and help its owner act on.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 12 SWOT -->
+<section class="sec dark" id="swot">
+  <div class="wrap">
+    <span class="sec-index">13 / 26</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">SWOT Analysis</p>
+      <h2 class="headline">An honest read of where Nabdha AI stands today.</h2>
+    </div>
+    <div class="grid grid-2 reveal">
+      <div class="term">
+        <div class="term-head"><span class="term-dot" style="background:var(--teal);"></span><span class="term-title" style="color:#4fe0c4;">Strengths</span><span class="term-count">8 items</span></div>
+        <div class="term-body">
+          <div class="term-row"><span class="chk solid" style="color:var(--teal);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Turns data into decisions, not just numbers</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--teal);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Ease of use — no analytics or AI expertise needed</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--teal);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Purpose-built for SMEs, not a huge complex system</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--teal);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Connects data from many sources for a complete picture</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--teal);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Early risk detection — stockouts, sales, cash flow</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--teal);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Discovers growth opportunities, not just problems</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--teal);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Ends in an action plan, not just a diagnosis</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--teal);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Arabic-language interface for the Saudi &amp; Arab market</span></div>
+        </div>
+      </div>
+      <div class="term">
+        <div class="term-head"><span class="term-dot" style="background:var(--red);"></span><span class="term-title" style="color:#ff9494;">Weaknesses</span><span class="term-count">5 items</span></div>
+        <div class="term-body">
+          <div class="term-row"><span class="chk solid" style="color:var(--red);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">A new product — no customer base or track record yet</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--red);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Analysis quality depends on the quality of data entered</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--red);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Needs multiple integrations for a complete picture</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--red);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Prediction estimates probability — never a guarantee</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--red);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Needs to build trust before owners rely on it fully</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 12b SWOT — OPPORTUNITIES & THREATS -->
+<section class="sec dark" id="swot-2">
+  <div class="wrap">
+    <span class="sec-index">14 / 26</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">SWOT Analysis</p>
+      <h2 class="headline">Where the market is pulling, and pushing back.</h2>
+    </div>
+    <div class="grid grid-2 reveal">
+      <div class="term">
+        <div class="term-head"><span class="term-dot" style="background:var(--blue);"></span><span class="term-title" style="color:#6d94ff;">Opportunities</span><span class="term-count">8 items</span></div>
+        <div class="term-body">
+          <div class="term-row"><span class="chk solid" style="color:var(--blue);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Continued growth in AI adoption for business</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--blue);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">SMEs need simpler, less complex analytics tools</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--blue);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Large amounts of underused business data</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--blue);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Room to build for the Saudi business environment, in Arabic</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--blue);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Path from analysis → prediction → recommendation → action</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--blue);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Potential to build a full AI Business Advisor for SMEs</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--blue);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Integration potential with e-commerce, accounting, POS, inventory</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--blue);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Periodic reports, instead of owners hunting for problems</span></div>
+        </div>
+      </div>
+      <div class="term">
+        <div class="term-head"><span class="term-dot" style="background:var(--amber);"></span><span class="term-title" style="color:#ffc266;">Threats</span><span class="term-count">5 items</span></div>
+        <div class="term-body">
+          <div class="term-row"><span class="chk solid" style="color:var(--amber);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Large BI players (Power BI, Zoho Analytics) already ship AI</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--amber);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Specialized AI analytics startups, e.g. Alytic</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--amber);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">AI tools evolve fast — today's edge is tomorrow's commodity</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--amber);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Price competition from general BI tools adding AI</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--amber);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Business data sensitivity — any privacy/security issue costs trust</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 13 COMPETITORS -->
+<section class="sec cream" id="competitors">
+  <div class="wrap">
+    <span class="sec-index">15 / 26</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Competitor Analysis</p>
+      <h2 class="headline">Where Nabdha sits next to the existing players.</h2>
+      <p class="lede">The most important finding: <b>Alytic is a Saudi product already selling almost this exact promise</b> — Arabic, Salla/Zid connections, AI copilot, free diagnostic — from SAR 146/month.</p>
+    </div>
+    <div class="tblwrap reveal">
+      <table class="cmp">
+        <thead><tr><th>Competitor</th><th>Focus</th><th>Price (SAR)</th><th>Gap Nabdha Can Use</th></tr></thead>
+        <tbody>
+          <tr><td class="hi">Alytic</td><td>Profit/SKU, stock alerts, 30/60/90-day cash forecast, AI copilot, Salla/Zid/Shopify, Arabic RTL.</td><td>146 / 296 / 484 per mo</td><td>E-commerce only — no restaurants, retail POS, accounting or Odoo data.</td></tr>
+          <tr><td class="hi">Rewaa</td><td>Retail POS/inventory, 7,000+ merchants, building AI insights.</td><td>Part of subscription</td><td>Raised $45M to build this — a future threat, but locked to its own retail customers today.</td></tr>
+          <tr><td class="hi">Microsoft Power BI</td><td>Full BI platform, dashboards, Copilot, pattern/anomaly/forecast detection.</td><td>~53–90 /user/mo</td><td>Needs an analyst to build; no written action plan — not made for a shop owner.</td></tr>
+          <tr><td class="hi">Zoho Analytics</td><td>250+ connectors, dashboards, Ask Zia AI on Standard+.</td><td>Not published</td><td>Generic, setup-heavy; Arabic not listed in plan comparison.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note reveal">Where Nabdha wins: <b>cross-system view</b> (POS + accounting + e-commerce + delivery in one report — every competitor above sees one system only), <b>sectors beyond e-commerce</b> (restaurants, cafés, retail — where Code-Ox already sells Odoo), and <b>written decisions, not dashboards</b>.</div>
+  </div>
+</section>
+
+<!-- 14 POSITIONING -->
+<section class="sec dark" id="positioning">
+  <div class="wrap">
+    <span class="sec-index">16 / 26</span>
+    <div class="pulse-quote reveal" style="max-width:820px;">
+      <p class="eyebrow" style="justify-content:center;">Proposed Positioning</p>
+      <h2 class="headline" style="margin:0 auto;text-align:center;">Nabdha AI: an intelligence layer that helps SMEs <em>read the pulse</em> of their business, detect risks and opportunities, and turn data into actionable decisions.</h2>
+      <p class="lede" style="margin:0 auto;text-align:center;">Not another e-commerce analytics tool competing with Alytic on Salla/Zid stores — a cross-system decision layer for restaurants, retail and Code-Ox's own Odoo client base, sectors Alytic doesn't reach.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 15 REVENUE STREAMS -->
+<section class="sec cream" id="revenue-streams">
+  <div class="wrap">
+    <span class="sec-index">17 / 26</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Business Model &amp; Revenue Streams</p>
+      <h2 class="headline">A SaaS core, with a diversified revenue ecosystem around it.</h2>
+      <p class="lede">Nabdha AI is based on a SaaS model — businesses pay a subscription to use the platform. Revenue sources are diversified so Nabdha doesn't rely on subscriptions alone.</p>
+    </div>
+
+    <div class="hub reveal" style="margin-bottom:48px;">
+      <svg class="hub-svg" viewBox="0 0 480 480"><g stroke="rgba(5,5,10,0.14)" stroke-width="1.4" stroke-dasharray="3 4">
+        <line x1="240" y1="240" x2="240" y2="58"/><line x1="240" y1="240" x2="369" y2="111"/><line x1="240" y1="240" x2="422" y2="240"/><line x1="240" y1="240" x2="369" y2="369"/>
+        <line x1="240" y1="240" x2="240" y2="422"/><line x1="240" y1="240" x2="111" y2="369"/><line x1="240" y1="240" x2="58" y2="240"/><line x1="240" y1="240" x2="111" y2="111"/>
+      </g></svg>
+      <div class="hub-node" style="left:50%;top:12%;"><div class="dot" style="color:var(--blue);"><svg class="ic" style="width:19px;height:19px;"><use href="#i-layers"/></svg></div><div class="lbl">1. Subscriptions</div></div>
+      <div class="hub-node" style="left:76.9%;top:23.1%;"><div class="dot" style="color:#0aa88b;"><svg class="ic" style="width:19px;height:19px;"><use href="#i-chart"/></svg></div><div class="lbl">2. Premium Reports</div></div>
+      <div class="hub-node" style="left:88%;top:50%;"><div class="dot" style="color:#7c4ee8;"><svg class="ic" style="width:19px;height:19px;"><use href="#i-search"/></svg></div><div class="lbl">3. Business Review</div></div>
+      <div class="hub-node" style="left:76.9%;top:76.9%;"><div class="dot" style="color:#c9790a;"><svg class="ic" style="width:19px;height:19px;"><use href="#i-network"/></svg></div><div class="lbl">4. Integrations</div></div>
+      <div class="hub-node" style="left:50%;top:88%;"><div class="dot" style="color:#d6317f;"><svg class="ic" style="width:19px;height:19px;"><use href="#i-shield"/></svg></div><div class="lbl">5. Enterprise</div></div>
+      <div class="hub-node" style="left:23.1%;top:76.9%;"><div class="dot" style="color:#d63333;"><svg class="ic" style="width:19px;height:19px;"><use href="#i-users"/></svg></div><div class="lbl">6. Consulting</div></div>
+      <div class="hub-node" style="left:12%;top:50%;"><div class="dot" style="color:var(--blue);"><svg class="ic" style="width:19px;height:19px;"><use href="#i-award"/></svg></div><div class="lbl">7. Training</div></div>
+      <div class="hub-node" style="left:23.1%;top:23.1%;"><div class="dot" style="color:#0aa88b;"><svg class="ic" style="width:19px;height:19px;"><use href="#i-tag"/></svg></div><div class="lbl">8. Digital Products</div></div>
+      <div class="hub-center"><b>NABDHA</b><span>SAAS CORE</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 15b REVENUE STREAMS — DETAIL -->
+<section class="sec cream" id="revenue-streams-detail">
+  <div class="wrap">
+    <span class="sec-index">18 / 26</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Business Model &amp; Revenue Streams</p>
+      <h2 class="headline">Eight streams, one revenue ecosystem.</h2>
+    </div>
+    <div class="grid grid-4 reveal">
+      <div class="card top-accent border-blue"><div class="icon bg-blue accent-blue"><svg class="ic"><use href="#i-layers"/></svg></div><h4>1. SaaS Subscriptions</h4><p>Monthly and annual plans — the platform's core, recurring revenue.</p></div>
+      <div class="card top-accent border-teal"><div class="icon bg-teal accent-teal"><svg class="ic"><use href="#i-chart"/></svg></div><h4>2. Premium AI Reports</h4><p>An AI Business Health Report — performance, top risks, growth opportunities, customer &amp; product analysis, cash flow indicators, recommendations — sold separately or bundled into higher tiers.</p></div>
+      <div class="card top-accent border-purple"><div class="icon bg-purple accent-purple"><svg class="ic"><use href="#i-search"/></svg></div><h4>3. AI Business Review</h4><p>Periodic (monthly / quarterly) review service with a full action plan.</p></div>
+      <div class="card top-accent border-amber"><div class="icon bg-amber accent-amber"><svg class="ic"><use href="#i-network"/></svg></div><h4>4. Premium Integrations</h4><p>Advanced connections to accounting, POS, e-commerce, payment and inventory systems.</p></div>
+      <div class="card top-accent border-pink"><div class="icon bg-pink accent-pink"><svg class="ic"><use href="#i-shield"/></svg></div><h4>5. Enterprise Solutions</h4><p>Custom solutions for larger businesses — more users, integrations, permissions, dedicated support.</p></div>
+      <div class="card top-accent border-red"><div class="icon bg-red accent-red"><svg class="ic"><use href="#i-users"/></svg></div><h4>6. Consulting &amp; Expert Services</h4><p>Connects owners to consultants, financial advisors, accountants and marketing experts — Nabdha earns commission.</p></div>
+      <div class="card top-accent border-blue"><div class="icon bg-blue accent-blue"><svg class="ic"><use href="#i-award"/></svg></div><h4>7. Training &amp; Education</h4><p>Courses on data-driven decisions, AI for SMEs, financial and inventory management.</p></div>
+      <div class="card top-accent border-teal"><div class="icon bg-teal accent-teal"><svg class="ic"><use href="#i-tag"/></svg></div><h4>8. Digital Business Products</h4><p>Templates and toolkits — cash flow, KPI, financial planning, business growth toolkits.</p></div>
+    </div>
+
+    <h3 class="subhead reveal" style="margin-top:44px;">How a recommendation turns into commission <span class="tag tag-future" style="margin-left:6px;">Consulting example</span></h3>
+    <div class="flow reveal">
+      <div class="flow-node"><div class="t">Margin drop detected</div><div class="d">Nabdha's signal engine flags it</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Recommendation given</div><div class="d">Action plan in the report</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Owner wants help</div><div class="d">Implementing the fix</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Books an expert</div><div class="d">Through the platform — Nabdha earns commission</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 16 PRICING -->
+<section class="sec dark" id="pricing">
+  <div class="wrap">
+    <span class="sec-index">19 / 26</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Pricing Plans</p>
+      <h2 class="headline">Proposed SaaS tiers.</h2>
+      <p class="lede"><span class="tag tag-assumption">Prices are preliminary and subject to testing and adjustment after market research</span> — as stated in Nabdha's own brief.</p>
+    </div>
+    <div class="grid grid-4 reveal">
+      <div class="term">
+        <div class="term-head"><span class="term-dot" style="background:var(--txt-faint);"></span><span class="term-title">Basic</span></div>
+        <div class="term-price"><div class="amt">149–199</div><div class="per">SAR / month</div></div>
+        <div class="term-body">
+          <div class="term-row"><span class="chk solid" style="color:var(--txt-faint);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Core Business Intelligence Report</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--txt-faint);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Manual data entry</span></div>
+        </div>
+      </div>
+      <div class="term">
+        <div class="term-head"><span class="term-dot" style="background:var(--blue);"></span><span class="term-title" style="color:#6d94ff;">Growth</span></div>
+        <div class="term-price"><div class="amt">399–499</div><div class="per">SAR / month</div></div>
+        <div class="term-body">
+          <div class="term-row"><span class="chk solid" style="color:var(--blue);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Everything in Basic</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--blue);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">More data sources / integrations</span></div>
+        </div>
+      </div>
+      <div class="term">
+        <div class="term-head"><span class="term-dot" style="background:var(--amber);"></span><span class="term-title" style="color:#ffc266;">Pro</span></div>
+        <div class="term-price"><div class="amt">799–999</div><div class="per">SAR / month</div></div>
+        <div class="term-body">
+          <div class="term-row"><span class="chk solid" style="color:var(--amber);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Everything in Growth</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--amber);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Premium AI reports &amp; advisor access</span></div>
+        </div>
+      </div>
+      <div class="term">
+        <div class="term-head"><span class="term-dot" style="background:var(--purple);"></span><span class="term-title" style="color:#b39bfb;">Enterprise</span></div>
+        <div class="term-price"><div class="amt">Custom</div><div class="per">based on size &amp; needs</div></div>
+        <div class="term-body">
+          <div class="term-row"><span class="chk solid" style="color:var(--purple);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Everything in Pro</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--purple);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Custom integrations &amp; dedicated support</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="note reveal">Basic (SAR 149–199) matches Alytic's entry tier (SAR 146). Growth and Pro price above it — justified by cross-system data, multi-branch analysis and the monthly business review Alytic doesn't offer.</div>
+  </div>
+</section>
+
+<!-- 17 REVENUE STRUCTURE -->
+<section class="sec cream" id="revenue-structure">
+  <div class="wrap">
+    <span class="sec-index">20 / 26</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Revenue Structure</p>
+      <h2 class="headline">Five layers, one growth path.</h2>
+      <p class="lede">Recurring SaaS revenue at the core, with services, enterprise, education and digital revenue layered around it.</p>
+    </div>
+    <div class="steps reveal">
+      <div class="step"><div class="step-badge">1</div><div><h4>Recurring Revenue</h4><p>Monthly subscriptions, annual subscriptions.</p></div></div>
+      <div class="step"><div class="step-badge teal">2</div><div><h4>Premium Revenue</h4><p>Advanced AI reports, premium analytics, premium integrations.</p></div></div>
+      <div class="step"><div class="step-badge">3</div><div><h4>Enterprise Revenue</h4><p>Custom solutions, enterprise contracts, advanced support.</p></div></div>
+      <div class="step"><div class="step-badge teal">4</div><div><h4>Service Revenue</h4><p>Consulting, expert sessions, business reviews.</p></div></div>
+      <div class="step"><div class="step-badge">5</div><div><h4>Education &amp; Digital Revenue</h4><p>Training, digital products, business toolkits.</p></div></div>
+    </div>
+    <div class="note reveal">The core value: the customer pays for the journey from Data → Analysis → Insight → Prediction → Recommendation → Action → Measurement — not just a dashboard.</div>
+  </div>
+</section>
+
+<!-- 18 CUSTOMER REVENUE JOURNEY -->
+<section class="sec dark" id="journey">
+  <div class="wrap">
+    <span class="sec-index">21 / 26</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Customer Revenue Journey</p>
+      <h2 class="headline">From a free diagnostic to a full advisory relationship.</h2>
+    </div>
+    <div class="flow reveal">
+      <div class="flow-node"><div class="fic" style="background:rgba(255,255,255,0.08);color:var(--txt-soft);"><svg class="ic"><use href="#i-heart"/></svg></div><div class="t">Free Business Diagnostic</div><div class="d">First taste, no payment</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="fic" style="background:rgba(26,86,255,0.14);color:#6d94ff;"><svg class="ic"><use href="#i-layers"/></svg></div><div class="t">Monthly / Annual Subscription</div><div class="d">Core SaaS relationship begins</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="fic" style="background:rgba(0,201,167,0.14);color:#4fe0c4;"><svg class="ic"><use href="#i-chart"/></svg></div><div class="t">Premium AI Insights &amp; Reports</div><div class="d">Deeper, paid analysis</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="fic" style="background:rgba(245,158,11,0.14);color:#ffc266;"><svg class="ic"><use href="#i-network"/></svg></div><div class="t">Premium Integrations / Enterprise</div><div class="d">More data sources, bigger accounts</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="fic" style="background:rgba(239,68,68,0.14);color:#ff9494;"><svg class="ic"><use href="#i-users"/></svg></div><div class="t">Consulting &amp; Expert Services</div><div class="d">Help implementing recommendations</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="fic" style="background:rgba(139,92,246,0.14);color:#b39bfb;"><svg class="ic"><use href="#i-award"/></svg></div><div class="t">Training &amp; Digital Products</div><div class="d">Ongoing education &amp; toolkits</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 19 ONBOARDING -->
+<section class="sec cream" id="onboarding">
+  <div class="wrap">
+    <span class="sec-index">22 / 26</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">User Onboarding Flow</p>
+      <h2 class="headline">The user-facing path, from landing to access.</h2>
+    </div>
+    <div class="flow reveal">
+      <div class="flow-node"><div class="t">1. Landing</div><div class="d">User enters the platform</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">2. Registration</div><div class="d">Name and account details</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">3. Choose a Package</div><div class="d">Free, Premium, or Pro</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">4. Payment</div><div class="d">Premium / Pro only — Free skips this step</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">5. Access</div><div class="d">Lands in the platform with chosen package's features</div></div>
+    </div>
+    <div class="note critical reveal">Nabdha's own brief names two different package structures — <b>Free / Premium / Pro</b> at onboarding, and <b>Basic / Growth / Pro / Enterprise</b> in the pricing plans (§16). These should be aligned into one naming scheme before build — see Open Questions.</div>
+  </div>
+</section>
+
+<!-- 20 DECISIONS -->
+<section class="sec dark" id="decisions">
+  <div class="wrap">
+    <span class="sec-index">23 / 26</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Open Questions</p>
+      <h2 class="headline">What's worth resolving before the financial proposal.</h2>
+      <p class="lede">Drawn directly from gaps and ambiguities already flagged in Nabdha's own brief — not new scope, just decisions worth making explicit.</p>
+    </div>
+    <div class="track-label" style="margin-top:6px;margin-bottom:10px;color:#6d94ff;">Product &amp; Packaging</div>
+    <ul class="checklist reveal" style="max-width:780px;">
+      <li><span class="ck" style="color:var(--red);">●</span>Align the onboarding package names (Free / Premium / Pro) with the pricing plan tiers (Basic / Growth / Pro / Enterprise) into one scheme</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Confirm final pricing once market testing is complete — current figures are explicitly preliminary</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Define exactly what the Free tier includes, versus what requires Premium/Pro</li>
+    </ul>
+    <div class="track-label" style="margin-top:26px;margin-bottom:10px;color:#4fe0c4;">Data &amp; Integrations</div>
+    <ul class="checklist reveal" style="max-width:780px;">
+      <li><span class="ck" style="color:var(--red);">●</span>Prioritize which system integration ships first once MVP upload is live — order matters for which SME segment onboards next</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Confirm which external AI/LLM service powers the analysis and Smart Business Advisor, and its data-handling terms</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 20b OPEN QUESTIONS — MARKET & BUSINESS MODEL -->
+<section class="sec dark" id="decisions-2">
+  <div class="wrap">
+    <span class="sec-index">24 / 26</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Open Questions</p>
+      <h2 class="headline">Market reach, language, and what launches first.</h2>
+    </div>
+    <div class="track-label" style="margin-top:6px;margin-bottom:10px;color:#b39bfb;">Market &amp; Language</div>
+    <ul class="checklist reveal" style="max-width:780px;">
+      <li><span class="ck" style="color:var(--red);">●</span>Confirm initial target industries/sectors within the SME segment, and whether launch is Saudi-only or wider GCC/Arab market</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Confirm whether the MVP interface is Arabic-only at launch, or Arabic + English from day one</li>
+    </ul>
+    <div class="track-label" style="margin-top:26px;margin-bottom:10px;color:#ffc266;">Business Model</div>
+    <ul class="checklist reveal" style="max-width:780px;">
+      <li><span class="ck" style="color:var(--red);">●</span>Decide which revenue streams launch with the MVP versus phase in later (subscriptions are clearly core; reports, consulting, training and digital products can follow)</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Confirm whether the financial proposal should target a fixed budget ceiling, or be scoped from the MVP requirements first</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 21 NEXT STEPS -->
+<section class="sec cream" id="next">
+  <div class="wrap">
+    <span class="sec-index">25 / 26</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Recommended Next Steps</p>
+      <h2 class="headline">From this presentation to a signed MVP proposal.</h2>
+    </div>
+    <div class="grid grid-4 reveal">
+      <div class="card top-accent border-blue"><div class="eyebrow" style="margin-bottom:10px;">Step 01</div><h4>Review this presentation</h4><p>Confirm the platform understanding and flag anything mis-scoped.</p></div>
+      <div class="card top-accent border-blue"><div class="eyebrow" style="margin-bottom:10px;">Step 02</div><h4>Resolve open questions</h4><p>Work through packaging, data, market and business-model decisions above.</p></div>
+      <div class="card top-accent border-blue"><div class="eyebrow" style="margin-bottom:10px;">Step 03</div><h4>Receive the financial proposal</h4><p>A separate document breaking down MVP cost, timeline, hosting and support.</p></div>
+      <div class="card top-accent border-blue"><div class="eyebrow" style="margin-bottom:10px;">Step 04</div><h4>Kick off discovery</h4><p>Finalise architecture, design system, and sprint plan.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 22 CLOSING -->
+<section class="sec closing" id="closing">
+  <div class="blob" style="width:600px;height:600px;top:-260px;left:50%;transform:translateX(-50%);background:radial-gradient(circle,rgba(26,86,255,0.18),transparent 70%);"></div>
+  <div class="wrap" style="position:relative;z-index:2;">
+    <span class="sec-index" style="position:static;display:block;margin-bottom:18px;">26 / 26</span>
+    <h2>Nabdha AI becomes the pulse every SME checks before they decide.</h2>
+    <p>From data to insight, and from insight to decision — every report, every risk caught early, and every opportunity seized adds up to a business that operates with clarity, not guesswork.</p>
+    <div class="cta-row" style="justify-content:center;">
+      <a href="#cover" class="btn btn-blue">Back to Top</a>
+      <a href="#decisions" class="btn btn-line">Review Open Questions</a>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="brand" style="margin-bottom:12px;"><span class="brand-mark"></span><span class="brand-word">NABDHA AI</span></div>
+        <p style="font-size:12.5px;line-height:1.6;color:var(--txt-faint);max-width:240px;">The smart brain for SMEs. From data to insight, and from insight to decision.</p>
+      </div>
+      <div class="foot-col"><div class="foot-col-title">Platform</div><ul>
+        <li><a href="#solution">Solution</a></li><li><a href="#functions">Core Functions</a></li><li><a href="#mvp">The MVP</a></li><li><a href="#vision">Future Vision</a></li>
+      </ul></div>
+      <div class="foot-col"><div class="foot-col-title">Market</div><ul>
+        <li><a href="#swot">SWOT</a></li><li><a href="#competitors">Competitors</a></li><li><a href="#positioning">Positioning</a></li>
+      </ul></div>
+      <div class="foot-col"><div class="foot-col-title">Business Model</div><ul>
+        <li><a href="#revenue-streams">Revenue Streams</a></li><li><a href="#pricing">Pricing</a></li><li><a href="#onboarding">Onboarding</a></li>
+      </ul></div>
+      <div class="foot-col"><div class="foot-col-title">Document</div><ul>
+        <li>Platform Presentation</li><li>Pre-financial proposal</li><li>No CodeOx pricing included</li>
+      </ul></div>
+    </div>
+    <div class="foot-bottom">
+      <span>Nabdha AI — Platform Presentation</span>
+      <span>Financial proposal to follow separately</span>
+    </div>
+  </div>
+  <div class="ghost-word"><span>NABDHA</span></div>
+</footer>
+
+</main>
+
+<script>
+(function(){
+  var progress = document.getElementById('progress');
+  function onScroll(){
+    var h = document.documentElement;
+    var pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    progress.style.width = pct + '%';
+  }
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  var consoleTabs = document.querySelectorAll('.console-tabs span');
+  var consolePanels = document.querySelectorAll('.console-panel');
+  consoleTabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      var key = tab.getAttribute('data-tab');
+      consoleTabs.forEach(function(t){ t.classList.toggle('on', t === tab); });
+      consolePanels.forEach(function(p){ p.classList.toggle('on', p.getAttribute('data-panel') === key); });
+    });
+  });
+
+  var drawer = document.getElementById('drawer');
+  var overlay = document.getElementById('drawer-overlay');
+  var openBtn = document.getElementById('drawerBtn');
+  var closeBtn = document.getElementById('drawerClose');
+  function openDrawer(){ drawer.classList.add('open'); overlay.classList.add('open'); }
+  function closeDrawer(){ drawer.classList.remove('open'); overlay.classList.remove('open'); }
+  openBtn.addEventListener('click', openDrawer);
+  closeBtn.addEventListener('click', closeDrawer);
+  overlay.addEventListener('click', closeDrawer);
+  drawer.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', closeDrawer); });
+
+  var sections = Array.prototype.slice.call(document.querySelectorAll('.sec'));
+  var links = Array.prototype.slice.call(document.querySelectorAll('#drawer a'));
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        var id = e.target.id;
+        links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === '#'+id); });
+      }
+    });
+  }, {rootMargin:'-45% 0px -50% 0px'});
+  sections.forEach(function(s){ io.observe(s); });
+
+  var reveals = document.querySelectorAll('.reveal');
+  var rio = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); rio.unobserve(e.target); } });
+  }, {threshold:0.12});
+  reveals.forEach(function(r){ rio.observe(r); });
+
+  function currentIndex(){
+    var mid = window.scrollY + window.innerHeight*0.3;
+    var idx = 0;
+    sections.forEach(function(s,i){ if(s.offsetTop <= mid) idx = i; });
+    return idx;
+  }
+  document.getElementById('jumpDown').addEventListener('click', function(){
+    var i = Math.min(currentIndex()+1, sections.length-1);
+    sections[i].scrollIntoView({behavior:'smooth'});
+  });
+  document.getElementById('jumpUp').addEventListener('click', function(){
+    var i = Math.max(currentIndex()-1, 0);
+    sections[i].scrollIntoView({behavior:'smooth'});
+  });
+})();
+</script>
+</body>
+</html>

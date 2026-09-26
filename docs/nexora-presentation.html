@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXORA — Platform Presentation</title>
+<style>
+:root{
+  --void:#05050a;
+  --void-2:#0b0b16;
+  --void-3:#12121f;
+  --line: rgba(255,255,255,0.07);
+  --line-soft: rgba(255,255,255,0.04);
+  --cream:#f2f0eb;
+  --ink:#05050a;
+  --ink-soft: rgba(5,5,10,0.62);
+  --ink-faint: rgba(5,5,10,0.4);
+  --txt: rgba(242,240,235,0.92);
+  --txt-soft: rgba(242,240,235,0.62);
+  --txt-faint: rgba(242,240,235,0.4);
+  --blue:#1a56ff;
+  --teal:#00c9a7;
+  --purple:#8b5cf6;
+  --amber:#f59e0b;
+  --pink:#ec4899;
+  --red:#ef4444;
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Helvetica, Arial, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Menlo', 'Cascadia Code', monospace;
+  --ease: cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0;font-family:var(--font-body);background:var(--cream);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5;}
+img,svg{max-width:100%;display:block;}
+.ic{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+.wrap{max-width:1220px;margin:0 auto;padding:0 32px;}
+@media (max-width:640px){ .wrap{padding:0 20px;} }
+
+/* ---------- chrome ---------- */
+#progress{position:fixed;top:0;left:0;height:3px;background:var(--blue);z-index:100;width:0%;box-shadow:0 0 10px var(--blue);}
+.topbar{position:fixed;top:0;left:0;right:0;height:64px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;z-index:90;background:rgba(5,5,10,0.82);backdrop-filter:blur(20px) saturate(160%);border-bottom:1px solid var(--line);}
+.brand{display:flex;align-items:center;gap:9px;color:var(--txt);text-decoration:none;}
+.brand-mark{width:8px;height:8px;border-radius:50%;background:var(--blue);box-shadow:0 0 8px var(--blue);}
+.brand-word{font-family:var(--font-display);font-size:16px;font-weight:800;letter-spacing:-0.01em;}
+.brand-sub{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--txt-faint);text-transform:uppercase;margin-left:6px;}
+.nav-links{display:flex;gap:24px;list-style:none;margin:0;padding:0;}
+.nav-links a{color:var(--txt-soft);text-decoration:none;font-size:13px;font-weight:500;transition:color 160ms;}
+.nav-links a:hover{color:var(--txt);}
+@media (max-width:900px){ .nav-links{display:none;} }
+.nav-cta{display:flex;align-items:center;gap:10px;background:var(--blue);color:#fff;border:none;border-radius:100px;
+  padding:9px 18px;font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;
+  cursor:pointer;transition:transform 160ms var(--ease), box-shadow 160ms var(--ease);}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 12px 30px rgba(26,86,255,0.35);}
+
+#drawer-overlay{position:fixed;inset:0;background:rgba(2,2,5,0.6);opacity:0;pointer-events:none;transition:opacity 220ms var(--ease);z-index:95;}
+#drawer-overlay.open{opacity:1;pointer-events:auto;}
+#drawer{position:fixed;top:0;right:0;bottom:0;width:min(380px,88vw);background:var(--void-2);border-left:1px solid var(--line);
+  z-index:96;transform:translateX(100%);transition:transform 320ms var(--ease);overflow-y:auto;padding:88px 0 40px;}
+#drawer.open{transform:translateX(0);}
+.drawer-close{position:absolute;top:22px;right:24px;background:none;border:none;color:var(--txt-soft);font-size:22px;cursor:pointer;line-height:1;}
+.drawer-list{list-style:none;margin:0;padding:0 12px;}
+.drawer-list a{display:flex;gap:14px;align-items:baseline;padding:10px 16px;border-radius:10px;text-decoration:none;
+  color:var(--txt-soft);font-size:13.5px;transition:background 140ms, color 140ms;}
+.drawer-list a:hover, .drawer-list a.active{background:rgba(26,86,255,0.1);color:var(--txt);}
+.drawer-list a.active{color:#6d94ff;}
+.drawer-list .num{font-family:var(--font-mono);font-size:10.5px;color:var(--txt-faint);min-width:20px;}
+.drawer-group{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt-faint);
+  padding:20px 26px 8px;}
+
+#jumpctl{position:fixed;right:22px;bottom:22px;display:flex;flex-direction:column;gap:8px;z-index:80;}
+.jumpbtn{width:40px;height:40px;border-radius:50%;background:rgba(5,5,10,0.85);backdrop-filter:blur(12px);
+  border:1px solid var(--line);color:#6d94ff;display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:transform 140ms var(--ease), border-color 140ms;}
+.jumpbtn:hover{border-color:var(--blue);transform:translateY(-2px);}
+@media (max-width:640px){ #jumpctl{display:none;} }
+
+/* ---------- section shell ---------- */
+.sec{padding:110px 0;position:relative;overflow:hidden;}
+.sec.dark{background:var(--void);color:var(--txt);}
+.sec.cream{background:var(--cream);color:var(--ink);}
+@media (max-width:640px){ .sec{padding:72px 0;} }
+.sec-index{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;position:absolute;top:34px;right:32px;color:var(--txt-faint);}
+.cream .sec-index{color:var(--ink-faint);}
+
+.eyebrow{font:700 11.5px/1 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--blue);
+  margin:0 0 20px;display:flex;align-items:center;gap:10px;}
+.eyebrow::before{content:'';width:22px;height:1px;background:var(--blue);}
+h2.headline{font-family:var(--font-display);font-weight:800;font-size:clamp(2rem,4vw,3.1rem);line-height:1.06;
+  letter-spacing:-0.025em;margin:0 0 20px;max-width:820px;}
+h2.headline em, h1 em{font-style:normal;font-family:var(--font-serif);font-weight:400;font-style:italic;color:var(--txt-faint);}
+.cream h2.headline em{color:var(--ink-faint);}
+h3.subhead{font-family:var(--font-display);font-weight:800;font-size:clamp(1.1rem,2vw,1.4rem);letter-spacing:-0.015em;margin:0 0 12px;}
+.lede{font-size:1.05rem;line-height:1.68;max-width:640px;color:var(--txt-soft);}
+.cream .lede{color:var(--ink-soft);}
+.section-head{margin-bottom:52px;}
+
+.tag{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:.07em;
+  text-transform:uppercase;padding:5px 11px;border-radius:100px;line-height:1;white-space:nowrap;font-weight:700;}
+.tag-mvp{background:rgba(26,86,255,0.1);color:#6d94ff;border:1px solid rgba(26,86,255,0.3);}
+.cream .tag-mvp{color:#1a56ff;background:rgba(26,86,255,0.07);}
+.tag-future{background:rgba(139,92,246,0.1);color:#b39bfb;border:1px solid rgba(139,92,246,0.3);}
+.cream .tag-future{color:#7c4ee8;background:rgba(139,92,246,0.07);}
+.tag-assumption{background:transparent;border:1px dashed var(--txt-faint);color:var(--txt-faint);font-style:italic;font-weight:500;}
+.cream .tag-assumption{border-color:var(--ink-faint);color:var(--ink-faint);}
+.tag-example{background:transparent;border:1px dotted var(--txt-faint);color:var(--txt-soft);font-weight:500;}
+.cream .tag-example{color:var(--ink-soft);border-color:var(--ink-faint);}
+.tag-open{background:rgba(239,68,68,0.1);color:#f38a8a;border:1px solid rgba(239,68,68,0.3);}
+
+/* ---------- blobs ---------- */
+.blob{position:absolute;border-radius:50%;pointer-events:none;filter:blur(70px);z-index:0;}
+
+/* ---------- grids/cards ---------- */
+.grid{display:grid;gap:18px;}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+@media (max-width:900px){ .grid-3,.grid-4{grid-template-columns:repeat(2,1fr);} }
+@media (max-width:640px){ .grid-2,.grid-3,.grid-4{grid-template-columns:1fr;} }
+
+.card{background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:16px;padding:26px;position:relative;
+  overflow:hidden;transition:transform 220ms var(--ease), border-color 220ms;}
+.cream .card{background:#fff;border-color:rgba(5,5,10,0.08);}
+.card:hover{transform:translateY(-3px);}
+.card .icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:18px;}
+.card h4{font-family:var(--font-display);font-size:1.02rem;font-weight:800;margin:0 0 8px;letter-spacing:-0.01em;}
+.card p{margin:0;font-size:.88rem;color:var(--txt-soft);line-height:1.6;}
+.cream .card p{color:var(--ink-soft);}
+.card .ghost{position:absolute;bottom:-14px;right:-10px;width:110px;height:110px;opacity:.08;z-index:0;}
+.card > *{position:relative;z-index:1;}
+.card.top-accent{border-top-width:3px;border-top-style:solid;}
+
+/* accent utility classes */
+.accent-blue{color:#6d94ff;} .cream .accent-blue{color:var(--blue);}
+.accent-teal{color:#4fe0c4;} .cream .accent-teal{color:#0aa88b;}
+.accent-purple{color:#b39bfb;} .cream .accent-purple{color:#7c4ee8;}
+.accent-amber{color:#ffc266;} .cream .accent-amber{color:#c9790a;}
+.accent-pink{color:#ff9ac4;} .cream .accent-pink{color:#d6317f;}
+.accent-red{color:#ff9494;} .cream .accent-red{color:#d63333;}
+.bg-blue{background:rgba(26,86,255,0.1);} .bg-teal{background:rgba(0,201,167,0.1);} .bg-purple{background:rgba(139,92,246,0.1);}
+.bg-amber{background:rgba(245,158,11,0.1);} .bg-pink{background:rgba(236,72,153,0.1);} .bg-red{background:rgba(239,68,68,0.1);}
+.border-blue{border-color:var(--blue);} .border-teal{border-color:var(--teal);} .border-purple{border-color:var(--purple);}
+.border-amber{border-color:var(--amber);} .border-pink{border-color:var(--pink);} .border-red{border-color:var(--red);}
+
+/* ---------- pill clusters ---------- */
+.pill-group{margin-bottom:26px;}
+.pill-group-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.pill-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.pill-group-label{font-family:var(--font-mono);font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--txt);white-space:nowrap;}
+.cream .pill-group-label{color:var(--ink);}
+.pill-group-line{flex:1;height:1px;background:var(--line);}
+.cream .pill-group-line{background:rgba(5,5,10,0.09);}
+.pill-row{display:flex;flex-wrap:wrap;gap:8px;}
+.pill{font-family:var(--font-mono);font-size:12px;padding:6px 12px;border-radius:8px;border:1px solid;}
+
+/* ---------- feature pyramid (org-chart tree) ---------- */
+.pyramid{margin-top:18px;display:flex;flex-direction:column;align-items:center;}
+.pyr-root{font-family:var(--font-display);font-weight:800;font-size:.9rem;padding:9px 20px;border-radius:10px;
+  background:rgba(5,5,10,0.035);border:1px solid rgba(5,5,10,0.14);color:var(--ink);white-space:nowrap;}
+.pyr-stem{width:2px;height:16px;background:rgba(5,5,10,0.16);}
+.pyr-branches{display:flex;justify-content:center;gap:48px;width:100%;padding-top:16px;flex-wrap:wrap;}
+.pyr-branch{position:relative;display:flex;flex-direction:column;align-items:center;flex:1 1 240px;max-width:320px;}
+.pyr-branch::before{content:'';position:absolute;top:-16px;left:50%;width:2px;height:16px;background:rgba(5,5,10,0.16);
+  transform:translateX(-50%);}
+@media (min-width:641px){
+  .pyr-branch:first-child::after{content:'';position:absolute;top:-16px;left:50%;width:24px;height:2px;background:rgba(5,5,10,0.16);}
+  .pyr-branch:last-child::after{content:'';position:absolute;top:-16px;left:calc(50% - 24px);width:24px;height:2px;background:rgba(5,5,10,0.16);}
+}
+.pyr-node{font-family:var(--font-mono);font-size:.78rem;font-weight:800;padding:7px 15px;border-radius:100px;white-space:nowrap;}
+.pyr-node.blue{background:rgba(26,86,255,0.08);border:1px solid rgba(26,86,255,0.32);color:var(--blue);}
+.pyr-node.teal{background:rgba(0,201,167,0.08);border:1px solid rgba(0,201,167,0.32);color:#0aa88b;}
+.pyr-node.purple{background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.32);color:#7c4ee8;}
+.pyr-leaves{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:13px;}
+.pyr-chip{font-family:var(--font-mono);font-size:10px;padding:5px 10px;border-radius:100px;background:rgba(5,5,10,0.035);
+  border:1px solid rgba(5,5,10,0.12);color:var(--ink-soft);white-space:nowrap;}
+
+/* ---------- flow row ---------- */
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin-top:8px;}
+.flow-node{flex:1 1 160px;background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:150px;}
+.cream .flow-node{background:#fff;border-color:rgba(5,5,10,0.08);}
+.flow-node .t{font-family:var(--font-display);font-weight:800;font-size:.95rem;margin-bottom:4px;}
+.flow-node .d{font-size:.8rem;color:var(--txt-soft);}
+.cream .flow-node .d{color:var(--ink-soft);}
+.flow-arrow{flex:0 0 38px;display:flex;align-items:center;justify-content:center;color:var(--blue);}
+@media (max-width:760px){ .flow{flex-direction:column;} .flow-arrow{transform:rotate(90deg);height:22px;} }
+
+/* ---------- step list (journeys) — continuous connected process ---------- */
+.steps{position:relative;margin-top:14px;}
+.steps::before{content:'';position:absolute;left:16px;top:6px;bottom:6px;width:2px;
+  background:linear-gradient(var(--blue),rgba(26,86,255,0.12));z-index:0;}
+.cream .steps::before{background:linear-gradient(var(--blue),rgba(26,86,255,0.22));}
+.step{display:flex;gap:18px;padding:16px 0;position:relative;z-index:1;}
+.step-badge{flex:0 0 34px;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-mono);font-size:12px;font-weight:800;background:rgba(26,86,255,0.16);color:#6d94ff;
+  box-shadow:0 0 0 6px var(--void);}
+.cream .step-badge{background:rgba(26,86,255,0.1);color:var(--blue);box-shadow:0 0 0 6px var(--cream);}
+.step-badge.teal{background:rgba(0,201,167,0.16);color:#4fe0c4;}
+.cream .step-badge.teal{background:rgba(0,201,167,0.1);color:#0aa88b;}
+.step h4{font-family:var(--font-display);font-size:.98rem;font-weight:800;margin:0 0 5px;}
+.step p{margin:0;font-size:.86rem;color:var(--txt-soft);line-height:1.6;max-width:620px;}
+.cream .step p{color:var(--ink-soft);}
+
+/* ---------- status track ---------- */
+.track{display:flex;flex-wrap:wrap;gap:0;align-items:center;margin-top:16px;}
+.track .st{font-family:var(--font-mono);font-size:11px;letter-spacing:.02em;padding:8px 13px;border-radius:100px;font-weight:600;
+  white-space:nowrap;border:1px solid;}
+.track .sep{width:20px;text-align:center;color:var(--txt-faint);font-size:12px;}
+.cream .track .sep{color:var(--ink-faint);}
+.track-label{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt-faint);margin-bottom:4px;}
+.cream .track-label{color:var(--ink-faint);}
+
+/* ---------- weighted bars ---------- */
+.wbar-row{display:grid;grid-template-columns:150px 1fr 40px;align-items:center;gap:14px;padding:9px 0;border-bottom:1px solid var(--line);}
+.cream .wbar-row{border-color:rgba(5,5,10,0.08);}
+.wbar-row .name{font-size:.84rem;color:var(--txt-soft);}
+.cream .wbar-row .name{color:var(--ink-soft);}
+.wbar-track{height:7px;border-radius:100px;background:rgba(255,255,255,0.06);overflow:hidden;}
+.cream .wbar-track{background:rgba(5,5,10,0.07);}
+.wbar-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--blue),#6d94ff);}
+.wbar-row .pct{font-family:var(--font-mono);font-size:.76rem;color:var(--txt-faint);text-align:right;}
+.cream .wbar-row .pct{color:var(--ink-faint);}
+
+/* ---------- form blueprint ---------- */
+.formblue{background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:18px;padding:28px;margin-top:8px;}
+.cream .formblue{background:#fff;border-color:rgba(5,5,10,0.08);}
+.fb-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+@media (max-width:640px){ .fb-grid{grid-template-columns:1fr;} }
+.fb-field.full{grid-column:1/-1;}
+.fb-field label{display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--txt-faint);margin-bottom:7px;}
+.cream .fb-field label{color:var(--ink-faint);}
+.fb-input{height:36px;border-radius:9px;border:1px dashed var(--line);}
+.cream .fb-input{border-color:rgba(5,5,10,0.13);}
+.fb-input.tall{height:70px;}
+.fb-input.pill-row{display:flex;gap:8px;align-items:center;padding:0 10px;}
+.fb-chip{font-family:var(--font-mono);font-size:10px;color:var(--txt-faint);background:rgba(255,255,255,0.06);border-radius:100px;padding:3px 9px;}
+.cream .fb-chip{color:var(--ink-faint);background:rgba(5,5,10,0.06);}
+
+/* ---------- dashboard mock ---------- */
+.mock{background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+.cream .mock{background:#fff;border-color:rgba(5,5,10,0.08);}
+.mock-bar{height:28px;background:rgba(255,255,255,0.04);display:flex;align-items:center;gap:6px;padding:0 12px;}
+.cream .mock-bar{background:rgba(5,5,10,0.03);}
+.mock-dot{width:7px;height:7px;border-radius:50%;}
+.mock-body{display:flex;height:210px;}
+.mock-nav{width:34%;border-right:1px solid var(--line);padding:12px 8px;}
+.cream .mock-nav{border-color:rgba(5,5,10,0.08);}
+.mock-nav .mi{font-size:10px;padding:7px 9px;border-radius:7px;color:var(--txt-soft);margin-bottom:3px;}
+.cream .mock-nav .mi{color:var(--ink-soft);}
+.mock-nav .mi.on{background:rgba(26,86,255,0.12);color:#6d94ff;font-weight:700;}
+.cream .mock-nav .mi.on{color:var(--blue);background:rgba(26,86,255,0.08);}
+.mock-main{flex:1;padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:start;}
+.mock-main .block{background:rgba(255,255,255,0.05);border-radius:7px;height:34px;}
+.cream .mock-main .block{background:rgba(5,5,10,0.05);}
+.mock-main .block.tall{height:76px;grid-column:1/-1;}
+
+/* ---------- table ---------- */
+.tblwrap{overflow-x:auto;margin-top:8px;border-radius:14px;border:1px solid var(--line);}
+.cream .tblwrap{border-color:rgba(5,5,10,0.08);}
+table.cmp{border-collapse:collapse;width:100%;min-width:600px;background:rgba(255,255,255,0.02);}
+.cream table.cmp{background:#fff;}
+table.cmp th, table.cmp td{padding:13px 18px;text-align:left;font-size:.86rem;border-bottom:1px solid var(--line);}
+.cream table.cmp th, .cream table.cmp td{border-color:rgba(5,5,10,0.08);}
+table.cmp th{font-family:var(--font-mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--txt-faint);}
+.cream table.cmp th{color:var(--ink-faint);}
+table.cmp tr:last-child td{border-bottom:none;}
+table.cmp td.hi{color:#6d94ff;font-weight:800;}
+.cream table.cmp td.hi{color:var(--blue);}
+
+/* ---------- double blind ---------- */
+.blind{display:flex;align-items:center;gap:18px;margin-top:22px;flex-wrap:wrap;}
+.blind-card{flex:1 1 200px;background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:14px;padding:20px;
+  text-align:center;min-width:170px;}
+.cream .blind-card{background:#fff;border-color:rgba(5,5,10,0.08);}
+.blind-mid{flex:0 0 auto;text-align:center;color:#6d94ff;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;
+  text-transform:uppercase;padding:0 6px;}
+
+/* ---------- hero console mockup ---------- */
+.console{position:relative;background:var(--void-2);border:1px solid var(--line);border-radius:18px;overflow:hidden;
+  box-shadow:0 30px 80px -20px rgba(26,86,255,0.28), 0 0 0 1px rgba(255,255,255,0.03) inset;}
+.console-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:rgba(5,5,10,0.5);
+  border-bottom:1px solid var(--line);}
+.console-head .l{display:flex;align-items:center;gap:8px;}
+.console-dot{width:7px;height:7px;border-radius:50%;background:var(--blue);box-shadow:0 0 8px var(--blue);}
+.console-title{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;color:var(--txt-soft);}
+.console-tag{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;color:#6d94ff;}
+.console-tabs{display:flex;border-bottom:1px solid var(--line);overflow-x:auto;}
+.console-tabs span{flex:1;padding:10px 8px;text-align:center;font-size:11.5px;font-weight:600;color:var(--txt-faint);
+  border-bottom:2px solid transparent;white-space:nowrap;}
+.console-tabs span.on{color:var(--txt);border-color:var(--blue);background:rgba(26,86,255,0.05);}
+.console-body{padding:16px 18px 18px;}
+.console-row-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.console-row-head .l{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;color:var(--txt-faint);text-transform:uppercase;}
+.console-row-head .r{font-family:var(--font-mono);font-size:10px;color:var(--teal);background:rgba(0,201,167,0.1);
+  border:1px solid rgba(0,201,167,0.25);border-radius:100px;padding:3px 9px;}
+.chead{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr;gap:4px;font-family:var(--font-mono);font-size:9px;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--txt-faint);padding:0 6px 6px;}
+.crow{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr;gap:4px;align-items:center;padding:9px 6px;border-radius:9px;
+  background:rgba(255,255,255,0.02);margin-bottom:5px;font-size:.75rem;}
+.crow .name{font-weight:700;color:var(--txt);}
+.crow .score{font-family:var(--font-mono);font-weight:800;color:#6d94ff;}
+.crow .status{font-family:var(--font-mono);font-size:9.5px;padding:3px 8px;border-radius:100px;justify-self:start;font-weight:700;}
+.console-foot{border-top:1px solid var(--line);padding-top:10px;font-family:var(--font-mono);font-size:10px;color:var(--txt-faint);}
+
+/* ---------- hub diagram ---------- */
+.hub{position:relative;width:100%;max-width:440px;aspect-ratio:1;margin:0 auto;}
+.hub-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:120px;height:120px;border-radius:50%;
+  background:var(--cream);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:3;
+  box-shadow:0 8px 32px rgba(5,5,10,0.12), 0 0 0 1px rgba(5,5,10,0.06);}
+.hub-center b{font-family:var(--font-display);font-weight:900;font-size:.85rem;letter-spacing:-0.01em;color:var(--ink);}
+.hub-center span{font-family:var(--font-mono);font-size:8px;color:var(--ink-faint);letter-spacing:.06em;margin-top:2px;}
+.hub-node{position:absolute;width:96px;transform:translate(-50%,-50%);text-align:center;z-index:2;}
+.hub-node .dot{width:46px;height:46px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;
+  background:var(--void);color:#fff;box-shadow:0 6px 20px rgba(5,5,10,0.18);}
+.hub-node .lbl{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--ink);}
+.hub-svg{position:absolute;inset:0;z-index:1;}
+
+/* ---------- terminal checklist card (roadmap / pricing) ---------- */
+.term{background:var(--void-2);border:1px solid var(--line);border-radius:16px;overflow:hidden;height:100%;display:flex;flex-direction:column;}
+.term-head{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line);background:rgba(255,255,255,0.02);}
+.term-dot{width:7px;height:7px;border-radius:50%;}
+.term-title{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;flex:1;}
+.term-count{font-family:var(--font-mono);font-size:9.5px;color:var(--txt-faint);}
+.term-body{padding:16px;display:flex;flex-direction:column;gap:8px;flex:1;}
+.term-row{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:9px;background:rgba(255,255,255,0.02);
+  border:1px solid var(--line-soft);}
+.term-row .chk{width:16px;height:16px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.term-row .chk.solid{background:currentColor;}
+.term-row .chk.solid svg{width:9px;height:9px;stroke:var(--void);stroke-width:3;}
+.term-row .chk.outline{border:1.5px solid var(--txt-faint);}
+.term-row span.lbl{font-size:.8rem;color:var(--txt-soft);flex:1;}
+.term-row.dim span.lbl{color:var(--txt-faint);}
+
+/* ---------- misc ---------- */
+.divider{height:1px;background:var(--line);margin:36px 0;}
+.cream .divider{background:rgba(5,5,10,0.08);}
+.note{border-left:3px solid var(--blue);background:rgba(26,86,255,0.06);border-radius:0 12px 12px 0;padding:15px 20px;
+  font-size:.86rem;color:#6d94ff;margin-top:20px;}
+.cream .note{background:rgba(26,86,255,0.05);color:#1a56ff;}
+.note.critical{border-left-color:var(--red);background:rgba(239,68,68,0.08);color:#ff9494;}
+.cream .note.critical{background:rgba(239,68,68,0.06);color:#c62828;}
+.checklist{list-style:none;margin:14px 0 0;padding:0;}
+.checklist li{display:flex;gap:10px;padding:8px 0;font-size:.86rem;color:var(--txt-soft);border-bottom:1px solid var(--line);}
+.cream .checklist li{color:var(--ink-soft);border-color:rgba(5,5,10,0.08);}
+.checklist li:last-child{border-bottom:none;}
+.checklist .ck{color:var(--blue);flex:0 0 auto;}
+
+/* ---------- ticker ---------- */
+.ticker-wrap{position:relative;background:var(--void-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  padding:16px 0;overflow:hidden;mask-image:linear-gradient(90deg,transparent,black 8%,black 92%,transparent);}
+.ticker-track{display:flex;width:max-content;animation:tick 32s linear infinite;}
+.ticker-track span{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--txt-faint);padding:0 26px;white-space:nowrap;border-right:1px solid var(--line);}
+@keyframes tick{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
+
+/* ---------- hero ---------- */
+.hero{min-height:94vh;display:flex;align-items:center;padding-top:80px;}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;position:relative;z-index:2;}
+@media (max-width:960px){ .hero-grid{grid-template-columns:1fr;} }
+.hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(2.3rem,5.4vw,4.1rem);line-height:1.04;
+  letter-spacing:-0.03em;margin:0 0 22px;}
+.hero p.sub{font-size:1.05rem;line-height:1.65;color:var(--txt-soft);max-width:520px;margin:0 0 30px;}
+.hero .meta-row{display:flex;gap:26px;flex-wrap:wrap;margin-top:24px;}
+.hero .meta{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--txt-faint);}
+.hero .meta b{display:block;color:var(--txt);font-family:var(--font-body);font-size:13.5px;letter-spacing:0;text-transform:none;
+  margin-top:4px;font-weight:700;}
+.btn{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;
+  padding:14px 26px;border-radius:100px;text-decoration:none;display:inline-block;transition:transform 140ms var(--ease), box-shadow 140ms;}
+.btn-blue{background:var(--blue);color:#fff;}
+.btn-blue:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(26,86,255,0.4);}
+.btn-line{border:1px solid var(--line);color:var(--txt);}
+.btn-line:hover{border-color:var(--blue);}
+.cta-row{display:flex;gap:12px;flex-wrap:wrap;}
+.scroll-cue{position:absolute;bottom:28px;left:32px;display:flex;align-items:center;gap:8px;color:var(--txt-faint);
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;z-index:2;}
+.scroll-cue .ln{width:26px;height:1px;background:var(--blue);}
+
+/* ---------- closing ---------- */
+.closing{background:var(--void);color:var(--txt);padding:130px 0 100px;text-align:center;}
+.closing h2{font-family:var(--font-display);font-size:clamp(2rem,4.4vw,3.3rem);font-weight:900;letter-spacing:-.025em;
+  max-width:740px;margin:0 auto 24px;line-height:1.1;}
+.closing p{max-width:540px;margin:0 auto 36px;color:var(--txt-soft);font-size:1.02rem;line-height:1.65;}
+
+/* ---------- footer ---------- */
+footer.foot{background:var(--void);border-top:1px solid var(--line);padding:64px 0 0;}
+.foot-grid{display:grid;grid-template-columns:1.4fr repeat(4,1fr);gap:32px;padding-bottom:44px;border-bottom:1px solid var(--line);}
+@media (max-width:900px){ .foot-grid{grid-template-columns:repeat(2,1fr);} }
+@media (max-width:560px){ .foot-grid{grid-template-columns:1fr;} }
+.foot-col-title{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt);
+  font-weight:700;margin-bottom:14px;}
+.foot-col ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px;}
+.foot-col a{color:var(--txt-faint);text-decoration:none;font-size:12.5px;}
+.foot-col a:hover{color:var(--txt-soft);}
+.foot-bottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:22px 0;font-family:var(--font-mono);
+  font-size:11px;color:var(--txt-faint);}
+.ghost-word{width:100%;overflow:hidden;position:relative;height:clamp(60px,16vw,220px);}
+.ghost-word span{position:absolute;left:50%;bottom:0;transform:translateX(-50%) translateY(20%);white-space:nowrap;
+  font-family:var(--font-display);font-weight:900;letter-spacing:-0.04em;font-size:clamp(4rem,18vw,18rem);
+  color:rgba(255,255,255,0.04);}
+
+/* ---------- appendix ---------- */
+.appendix{background:var(--cream);padding:70px 0;}
+.appendix summary{cursor:pointer;font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-soft);padding:14px 0;}
+.appx-table{width:100%;border-collapse:collapse;margin-top:16px;font-size:.82rem;}
+.appx-table th,.appx-table td{text-align:left;padding:9px 12px;border-bottom:1px solid rgba(5,5,10,0.08);}
+.appx-table th{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);}
+.appx-note{font-size:.85rem;color:var(--ink-soft);margin:0 0 4px;max-width:760px;}
+
+/* ---------- reveal ---------- */
+.reveal{opacity:0;transform:translateY(14px);transition:opacity 560ms var(--ease), transform 560ms var(--ease);}
+.reveal.in{opacity:1;transform:none;}
+
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto;}
+  .reveal{transition:opacity 200ms linear;transform:none;}
+  .ticker-track{animation:none;}
+  *{transition-duration:0.001ms !important; animation-duration:0.001ms !important;}
+}
+
+@media print{
+  #progress,.topbar,#drawer,#drawer-overlay,#jumpctl,.scroll-cue,.ticker-wrap{display:none !important;}
+  body{background:#fff;}
+  .sec{padding:30px 0;page-break-inside:avoid;}
+  .sec.dark{background:#fff;color:#05050a;}
+  .dark .card,.card,.flow-node,.mock,.formblue,.term{background:#fff;border-color:#ddd;color:#05050a;}
+  .lede,.step p,.card p{color:#333 !important;}
+  h1,h2,h3,h4{color:#05050a !important;}
+  .hero{min-height:auto;}
+  a{color:inherit;text-decoration:none;}
+  .ghost-word{display:none;}
+}
+</style>
+</head>
+<body>
+
+<svg style="display:none">
+<symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5z"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.4"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 8.5a3 3 0 1 1 3 3"/><path d="M21.5 20a5.5 5.5 0 0 0-4.4-5.4"/></symbol>
+<symbol id="i-network" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.6"/><circle cx="4" cy="5" r="2"/><circle cx="20" cy="5" r="2"/><circle cx="4" cy="19" r="2"/><circle cx="20" cy="19" r="2"/><path d="M5.7 6.4 10 10.4M18.3 6.4 14 10.4M5.7 17.6 10 13.6M18.3 17.6 14 13.6"/></symbol>
+<symbol id="i-message" viewBox="0 0 24 24"><path d="M4 4h16v12H8l-4 4z"/></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3 2 8l10 5 10-5z"/><path d="M2 13l10 5 10-5"/></symbol>
+<symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></symbol>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10M12 20V4M20 20v-7"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></symbol>
+<symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></symbol>
+<symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 3v18M5 7h14M5 7 3 12h4zM19 7l-2 5h4z"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.6 6 6.4.6-4.8 4.3 1.4 6.3L12 17l-5.6 3.2 1.4-6.3-4.8-4.3L9.4 9z"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></symbol>
+<symbol id="i-video" viewBox="0 0 24 24"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="m16 10 6-3.5v11L16 14"/></symbol>
+<symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M8.2 12.5 6 21l6-3 6 3-2.2-8.5"/></symbol>
+<symbol id="i-trend" viewBox="0 0 24 24"><path d="M3 17 9 11 13 15 21 7"/><path d="M21 12V7h-5"/></symbol>
+<symbol id="i-tag" viewBox="0 0 24 24"><path d="M20 10 12 2H4v8l8 8z"/><circle cx="7.5" cy="6.5" r="1.2"/></symbol>
+<symbol id="i-inbox" viewBox="0 0 24 24"><path d="M4 12h4l2 3h4l2-3h4"/><rect x="3" y="5" width="18" height="14" rx="2"/></symbol>
+</svg>
+
+<div id="progress"></div>
+
+<header class="topbar">
+  <a href="#cover" class="brand">
+    <span class="brand-mark"></span>
+    <span class="brand-word">NEXORA</span>
+    <span class="brand-sub">Platform Presentation</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#ecosystem">Ecosystem</a></li>
+    <li><a href="#e2e">How It Works</a></li>
+    <li><a href="#discover">Discovery</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#security">Trust</a></li>
+  </ul>
+  <button class="nav-cta" id="drawerBtn">Sections · 29</button>
+</header>
+
+<div id="drawer-overlay"></div>
+<nav id="drawer">
+  <button class="drawer-close" id="drawerClose">&times;</button>
+  <div class="drawer-group">Foundation</div>
+  <ul class="drawer-list">
+    <li><a href="#cover" data-n="00"><span class="num">00</span>Opening Statement</a></li>
+    <li><a href="#problem" data-n="01"><span class="num">01</span>The Market Problem</a></li>
+    <li><a href="#solution" data-n="02"><span class="num">02</span>The NEXORA Solution</a></li>
+    <li><a href="#ecosystem" data-n="03"><span class="num">03</span>Platform Ecosystem</a></li>
+    <li><a href="#users" data-n="04"><span class="num">04</span>Main User Groups</a></li>
+    <li><a href="#guest" data-n="05"><span class="num">05</span>Guest Experience</a></li>
+  </ul>
+  <div class="drawer-group">How It Works</div>
+  <ul class="drawer-list">
+    <li><a href="#e2e" data-n="06"><span class="num">06</span>End-to-End Journey</a></li>
+    <li><a href="#customer-journey" data-n="07"><span class="num">07</span>Customer Journey</a></li>
+    <li><a href="#provider-journey" data-n="08"><span class="num">08</span>Provider Journey</a></li>
+    <li><a href="#showcase" data-n="09"><span class="num">09</span>Provider Showcase</a></li>
+    <li><a href="#admin-journey" data-n="10"><span class="num">10</span>NEXORA Admin Journey</a></li>
+    <li><a href="#ai-assistant" data-n="11"><span class="num">11</span>AI-Assisted Request</a></li>
+    <li><a href="#matching" data-n="12"><span class="num">12</span>Provider Matching</a></li>
+    <li><a href="#discover" data-n="13"><span class="num">13</span>Two Ways to Discover</a></li>
+    <li><a href="#proposals" data-n="14"><span class="num">14</span>Invitations &amp; Proposals</a></li>
+    <li><a href="#compare" data-n="15"><span class="num">15</span>Proposal Comparison</a></li>
+    <li><a href="#messaging" data-n="16"><span class="num">16</span>Messaging &amp; Negotiation</a></li>
+    <li><a href="#statuses" data-n="17"><span class="num">17</span>Status Workflows</a></li>
+  </ul>
+  <div class="drawer-group">Trust &amp; Platform</div>
+  <ul class="drawer-list">
+    <li><a href="#reputation" data-n="18"><span class="num">18</span>Reputation System</a></li>
+    <li><a href="#dashboards" data-n="19"><span class="num">19</span>Dashboards</a></li>
+    <li><a href="#products" data-n="20"><span class="num">20</span>Product Breakdown</a></li>
+    <li><a href="#notify" data-n="21"><span class="num">21</span>Notifications &amp; Integrations</a></li>
+    <li><a href="#security" data-n="22"><span class="num">22</span>Security &amp; Ownership</a></li>
+    <li><a href="#language" data-n="23"><span class="num">23</span>Arabic / English</a></li>
+    <li><a href="#promotion" data-n="24"><span class="num">24</span>Subscription &amp; Promotion</a></li>
+  </ul>
+  <div class="drawer-group">Scope &amp; Next Steps</div>
+  <ul class="drawer-list">
+    <li><a href="#roadmap" data-n="25"><span class="num">25</span>MVP Roadmap</a></li>
+    <li><a href="#handover" data-n="26"><span class="num">26</span>Ownership &amp; Handover</a></li>
+    <li><a href="#decisions" data-n="27"><span class="num">27</span>Decisions Needed</a></li>
+    <li><a href="#next" data-n="28"><span class="num">28</span>Next Steps</a></li>
+    <li><a href="#closing" data-n="29"><span class="num">29</span>Closing Vision</a></li>
+  </ul>
+</nav>
+
+<div id="jumpctl">
+  <button class="jumpbtn" id="jumpUp" aria-label="Previous section">&uarr;</button>
+  <button class="jumpbtn" id="jumpDown" aria-label="Next section">&darr;</button>
+</div>
+
+<main>
+
+<!-- 00 HERO -->
+<section class="sec dark hero" id="cover">
+  <div class="blob" style="width:640px;height:640px;top:-220px;right:-200px;background:radial-gradient(circle,rgba(26,86,255,0.28),transparent 70%);"></div>
+  <div class="blob" style="width:480px;height:480px;bottom:-180px;left:-160px;background:radial-gradient(circle,rgba(0,201,167,0.14),transparent 70%);"></div>
+  <div class="wrap hero-grid">
+    <div>
+      <p class="eyebrow">NEXORA · AI Solutions Marketplace</p>
+      <h1>Where companies find the <em>right</em> AI partner — with confidence.</h1>
+      <p class="sub">A B2B marketplace that turns "we need an AI solution" into a qualified, compared, and trusted decision — built on a matching engine, transparent proposals, and a two-way reputation layer.</p>
+      <div class="cta-row">
+        <a href="#ecosystem" class="btn btn-blue">Explore the Platform</a>
+        <a href="#decisions" class="btn btn-line">Open Decisions</a>
+      </div>
+      <div class="meta-row">
+        <div class="meta">Prepared for<b>NEXORA</b></div>
+        <div class="meta">Document type<b>Platform Presentation</b></div>
+        <div class="meta">Stage<b>Pre-financial proposal</b></div>
+      </div>
+    </div>
+    <div class="console reveal">
+      <div class="console-head">
+        <div class="l"><span class="console-dot"></span><span class="console-title">NEXORA</span></div>
+        <span class="console-tag">MATCHING ENGINE</span>
+      </div>
+      <div class="console-tabs">
+        <span>Customer</span><span class="on">Matching</span><span>Proposals</span><span>Reputation</span>
+      </div>
+      <div class="console-body">
+        <div class="console-row-head"><span class="l">Provider Matches — Req. NEX-REQ-000125</span><span class="r">3 shortlisted</span></div>
+        <div class="chead"><span>Provider</span><span>Match</span><span>Rating</span><span>Status</span></div>
+        <div class="crow"><span class="name">Helix AI Systems</span><span class="score">96%</span><span>4.8 ★</span><span class="status" style="background:rgba(0,201,167,0.12);color:#4fe0c4;">Shortlisted</span></div>
+        <div class="crow"><span class="name">Cortex Automation</span><span class="score">91%</span><span>4.7 ★</span><span class="status" style="background:rgba(0,201,167,0.12);color:#4fe0c4;">Shortlisted</span></div>
+        <div class="crow"><span class="name">Voxa Labs</span><span class="score">88%</span><span>4.6 ★</span><span class="status" style="background:rgba(0,201,167,0.12);color:#4fe0c4;">Shortlisted</span></div>
+        <div class="crow"><span class="name">Datawise Partners</span><span class="score">61%</span><span>4.3 ★</span><span class="status" style="background:rgba(245,158,11,0.12);color:#ffc266;">Reviewing</span></div>
+        <div class="console-foot">Ranked by service fit, verification, rating &amp; response time — illustrative example</div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-cue"><span class="ln"></span><span>Scroll to explore</span></div>
+</section>
+
+<div class="ticker-wrap">
+  <div class="ticker-track">
+    <span>AI Solutions Marketplace</span><span>Rule-Based Matching</span><span>Verified Providers</span><span>Double-Blind Reviews</span>
+    <span>Transparent Proposals</span><span>NEXORA Trust Layer</span><span>Arabic + English · RTL/LTR</span><span>Admin Oversight</span>
+    <span>AI Solutions Marketplace</span><span>Rule-Based Matching</span><span>Verified Providers</span><span>Double-Blind Reviews</span>
+    <span>Transparent Proposals</span><span>NEXORA Trust Layer</span><span>Arabic + English · RTL/LTR</span><span>Admin Oversight</span>
+  </div>
+</div>
+
+<!-- 01 PROBLEM -->
+<section class="sec cream" id="problem">
+  <div class="wrap">
+    <span class="sec-index">01 / 29</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">The Market Problem</p>
+      <h2 class="headline">AI supply is exploding. Buying it responsibly is not getting easier.</h2>
+      <p class="lede">Companies know they need AI. What they lack is a safe, structured way to find the right provider — and providers lack a credible channel to reach demand that is actually ready to buy.</p>
+    </div>
+    <div class="grid grid-3 reveal">
+      <div class="card top-accent border-blue"><div class="icon bg-blue accent-blue"><svg class="ic"><use href="#i-network"/></svg></div>
+        <h4>Companies can't evaluate AI vendors</h4><p>No shared vocabulary, no comparable pricing, no way to verify a provider's real track record before committing budget.</p></div>
+      <div class="card top-accent border-amber"><div class="icon bg-amber accent-amber"><svg class="ic"><use href="#i-chart"/></svg></div>
+        <h4>Providers chase unqualified leads</h4><p>Time is spent on proposals for buyers who were never ready — no visibility into a customer's seriousness or payment history.</p></div>
+      <div class="card top-accent border-red"><div class="icon bg-red accent-red"><svg class="ic"><use href="#i-shield"/></svg></div>
+        <h4>No neutral trust layer exists</h4><p>Reviews are scattered, self-reported, or absent. Neither side has a reliable signal of how the other behaves in a project.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 SOLUTION -->
+<section class="sec dark" id="solution">
+  <div class="wrap">
+    <span class="sec-index">02 / 29</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">The NEXORA Solution</p>
+      <h2 class="headline">One guided path from business problem to <em>signed provider</em>.</h2>
+      <p class="lede">NEXORA does not sell AI. It is the qualification, matching, comparison, and trust layer that sits between demand and supply — so both sides move faster, with less risk.</p>
+    </div>
+    <div class="flow reveal">
+      <div class="flow-node"><div class="t">Identify need</div><div class="d">Guided intake, AI-assisted</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Discover solutions</div><div class="d">Categorised AI services</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Find providers</div><div class="d">Rule-based matching</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Compare &amp; select</div><div class="d">Side-by-side proposals</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Deliver &amp; rate</div><div class="d">Double-blind reputation</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 ECOSYSTEM (hub diagram) -->
+<section class="sec cream" id="ecosystem">
+  <div class="wrap">
+    <span class="sec-index">03 / 29</span>
+    <div class="grid grid-2" style="align-items:center;gap:56px;">
+      <div class="reveal">
+        <p class="eyebrow">Platform Ecosystem</p>
+        <h2 class="headline">NEXORA sits at the center of <em>every</em> transaction.</h2>
+        <p class="lede">Not a directory listing. NEXORA actively qualifies both sides, runs the matching logic, hosts the communication, and keeps oversight over every request from intake to completion.</p>
+        <div class="note">Six connected functions: demand intake, supply verification, matching, proposals, messaging, and reputation — all owned by NEXORA.</div>
+      </div>
+      <div class="reveal">
+        <div class="hub" id="hubDiagram">
+          <svg class="hub-svg" viewBox="0 0 440 440"><g stroke="rgba(5,5,10,0.14)" stroke-width="1.4" stroke-dasharray="3 4">
+            <line x1="220" y1="220" x2="220" y2="55"/><line x1="220" y1="220" x2="367" y2="137"/><line x1="220" y1="220" x2="367" y2="303"/>
+            <line x1="220" y1="220" x2="220" y2="385"/><line x1="220" y1="220" x2="73" y2="303"/><line x1="220" y1="220" x2="73" y2="137"/>
+          </g></svg>
+          <div class="hub-node" style="left:50%;top:12.5%;"><div class="dot" style="color:var(--blue);"><svg class="ic" style="width:20px;height:20px;"><use href="#i-users"/></svg></div><div class="lbl">Company</div></div>
+          <div class="hub-node" style="left:83.4%;top:31%;"><div class="dot" style="color:var(--teal);"><svg class="ic" style="width:20px;height:20px;"><use href="#i-shield"/></svg></div><div class="lbl">Verification</div></div>
+          <div class="hub-node" style="left:83.4%;top:69%;"><div class="dot" style="color:var(--purple);"><svg class="ic" style="width:20px;height:20px;"><use href="#i-network"/></svg></div><div class="lbl">Matching</div></div>
+          <div class="hub-node" style="left:50%;top:87.5%;"><div class="dot" style="color:var(--amber);"><svg class="ic" style="width:20px;height:20px;"><use href="#i-layers"/></svg></div><div class="lbl">Proposals</div></div>
+          <div class="hub-node" style="left:16.6%;top:69%;"><div class="dot" style="color:var(--pink);"><svg class="ic" style="width:20px;height:20px;"><use href="#i-message"/></svg></div><div class="lbl">Messaging</div></div>
+          <div class="hub-node" style="left:16.6%;top:31%;"><div class="dot" style="color:var(--red);"><svg class="ic" style="width:20px;height:20px;"><use href="#i-star"/></svg></div><div class="lbl">Reputation</div></div>
+          <div class="hub-center"><b>NEXORA</b><span>TRUST LAYER</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 USERS -->
+<section class="sec dark" id="users">
+  <div class="wrap">
+    <span class="sec-index">04 / 29</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Main User Groups</p>
+      <h2 class="headline">Three roles, three dashboards, one shared record of truth.</h2>
+    </div>
+    <div class="grid grid-3 reveal">
+      <div class="card top-accent border-blue"><div class="icon bg-blue accent-blue"><svg class="ic"><use href="#i-users"/></svg></div>
+        <h4>Customer / Company</h4><p>A company looking for an AI solution. Creates requests, reviews proposals, selects a provider, and rates the outcome.</p></div>
+      <div class="card top-accent border-teal"><div class="icon bg-teal accent-teal"><svg class="ic"><use href="#i-network"/></svg></div>
+        <h4>Service Provider</h4><p>A company or specialist offering AI solutions. Builds a public profile, receives invitations, submits proposals.</p></div>
+      <div class="card top-accent border-purple"><div class="icon bg-purple accent-purple"><svg class="ic"><use href="#i-shield"/></svg></div>
+        <h4>NEXORA Administration</h4><p>Manages users, requests, providers, verification, categories, transactions, content, and disputes.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 GUEST EXPERIENCE (NEW) -->
+<section class="sec cream" id="guest">
+  <div class="wrap">
+    <span class="sec-index">05 / 29</span>
+    <div style="margin-bottom:20px;"><span class="tag tag-future">New — recommended addition</span></div>
+    <div class="section-head reveal">
+      <p class="eyebrow">Guest Experience</p>
+      <h2 class="headline">What can someone see <em>before</em> they sign up?</h2>
+      <p class="lede">Not everyone arrives ready to create an account. A fourth, unnamed audience sits ahead of the three roles above — the anonymous visitor — and the public side of NEXORA has to earn their trust before asking for a login.</p>
+    </div>
+
+    <div class="flow reveal">
+      <div class="flow-node"><div class="t">Lands on the site</div><div class="d">From search, a shared link, or a referral</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Browses freely</div><div class="d">Categories, how it works, provider profiles</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Starts a request</div><div class="d">Fills the guided form anonymously</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Signup gate</div><div class="d">Account required only to submit</div></div>
+    </div>
+
+    <div class="grid grid-2 reveal" style="margin-top:32px;">
+      <div class="card top-accent border-teal">
+        <div class="icon bg-teal accent-teal"><svg class="ic"><use href="#i-globe"/></svg></div>
+        <h4>Visible to a guest, no account needed</h4>
+        <ul class="checklist">
+          <li><span class="ck">✓</span>Home, About, How It Works, FAQs, Contact</li>
+          <li><span class="ck">✓</span>AI service categories and what each one covers</li>
+          <li><span class="ck">✓</span>An individual provider's public profile, via its shareable link</li>
+          <li><span class="ck">✓</span>Platform trust signals — verification badges, category coverage, how matching works</li>
+          <li><span class="ck">✓</span>The guided request form itself, filled in but not yet submitted</li>
+        </ul>
+      </div>
+      <div class="card top-accent border-red">
+        <div class="icon bg-red accent-red"><svg class="ic"><use href="#i-lock"/></svg></div>
+        <h4>Requires a company or provider account</h4>
+        <ul class="checklist">
+          <li><span class="ck">✓</span>Submitting a request — the guided form's final step</li>
+          <li><span class="ck">✓</span>Messaging a provider, or being invited to a request</li>
+          <li><span class="ck">✓</span>Viewing proposals, pricing, or comparison views</li>
+          <li><span class="ck">✓</span>Any dashboard — Customer, Provider, or Admin</li>
+          <li><span class="ck">✓</span>Rating a provider, a customer, or NEXORA itself</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="note reveal">This is a different question from self-serve provider browse/search (§13) — that's about a full filterable directory, deferred past MVP. A provider's own public profile page, reachable via its shareable link, is core scope from the original brief regardless of that decision.</div>
+  </div>
+</section>
+
+<!-- 06 END TO END -->
+<section class="sec cream" id="e2e">
+  <div class="wrap">
+    <span class="sec-index">06 / 29</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">End-to-End Marketplace Journey</p>
+      <h2 class="headline">From a business problem to a completed, <em>rated</em> project.</h2>
+      <p class="lede">The full lifecycle, seen from above. Each step is expanded in its own section later in this presentation.</p>
+    </div>
+    <div class="grid grid-4 reveal">
+      <div class="card"><div class="eyebrow" style="margin-bottom:10px;">Step 01</div><h4>Business problem</h4><p>The company recognises a need — e.g. reducing time spent on customer response.</p></div>
+      <div class="card"><div class="eyebrow" style="margin-bottom:10px;">Step 02</div><h4>Guided request</h4><p>A structured intake form captures objective, industry, budget, timeline, and requirements.</p></div>
+      <div class="card"><div class="eyebrow" style="margin-bottom:10px;">Step 03</div><h4>AI assistance</h4><p>Free-text input is classified into a suggested category, solution type, and objective.</p></div>
+      <div class="card"><div class="eyebrow" style="margin-bottom:10px;">Step 04</div><h4>Admin review</h4><p>NEXORA reviews the structured request before release to the matching engine.</p></div>
+      <div class="card"><div class="eyebrow" style="margin-bottom:10px;">Step 05</div><h4>Provider matching</h4><p>Eligible providers are ranked using weighted, explainable criteria.</p></div>
+      <div class="card"><div class="eyebrow" style="margin-bottom:10px;">Step 06</div><h4>Invitations</h4><p>A shortlist of providers is notified and may accept, decline, or submit a proposal.</p></div>
+      <div class="card"><div class="eyebrow" style="margin-bottom:10px;">Step 07</div><h4>Proposals</h4><p>Providers submit scope, price, timeline, warranty, and terms.</p></div>
+      <div class="card"><div class="eyebrow" style="margin-bottom:10px;">Step 08</div><h4>Comparison</h4><p>The customer compares all proposals side by side on one screen.</p></div>
+      <div class="card"><div class="eyebrow" style="margin-bottom:10px;">Step 09</div><h4>Provider selection</h4><p>The customer selects a provider and moves the request into negotiation, then contract.</p></div>
+      <div class="card"><div class="eyebrow" style="margin-bottom:10px;">Step 10</div><h4>Project execution</h4><p>The project proceeds outside or alongside the platform, tracked through status updates.</p></div>
+      <div class="card"><div class="eyebrow" style="margin-bottom:10px;">Step 11</div><h4>Completion</h4><p>Both sides confirm delivery and the request is marked complete.</p></div>
+      <div class="card"><div class="eyebrow" style="margin-bottom:10px;">Step 12</div><h4>Double-blind ratings</h4><p>Customer and provider rate each other; results reveal only once both have submitted.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 CUSTOMER JOURNEY -->
+<section class="sec dark" id="customer-journey">
+  <div class="wrap">
+    <span class="sec-index">07 / 29</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Customer Journey</p>
+      <h2 class="headline">What the company sees, does, and receives.</h2>
+    </div>
+    <div class="grid grid-3 reveal">
+      <div class="card top-accent border-blue"><div class="eyebrow" style="margin-bottom:10px;">Step 01</div><h4>Create company account</h4><p>Company name, industry, size, contact person, email, mobile, password. Verified by email / SMS / OTP.</p></div>
+      <div class="card top-accent border-blue"><div class="eyebrow" style="margin-bottom:10px;">Step 02</div><h4>Request an AI solution</h4><p>Completes the guided intake form, optionally assisted by the AI request assistant.</p></div>
+      <div class="card top-accent border-blue"><div class="eyebrow" style="margin-bottom:10px;">Step 03</div><h4>Receive Request ID</h4><p>System generates an ID (e.g. <span style="font-family:var(--font-mono)">NEX-REQ-000125</span>); dashboard shows status <b>Under Review</b>.</p></div>
+      <div class="card top-accent border-blue"><div class="eyebrow" style="margin-bottom:10px;">Step 04</div><h4>Get matched &amp; notified</h4><p>Notification: "Your request has been received." Status advances to <b>Matched</b>.</p></div>
+      <div class="card top-accent border-blue"><div class="eyebrow" style="margin-bottom:10px;">Step 05</div><h4>Review proposals</h4><p>Notification: "A new proposal has been received." Proposals accumulate under the request.</p></div>
+      <div class="card top-accent border-blue"><div class="eyebrow" style="margin-bottom:10px;">Step 06</div><h4>Compare &amp; message</h4><p>Uses the comparison view and internal messaging to negotiate directly with shortlisted providers.</p></div>
+      <div class="card top-accent border-blue"><div class="eyebrow" style="margin-bottom:10px;">Step 07</div><h4>Select a provider</h4><p>Notification: "You have been selected to execute the project" mirrors on the provider side.</p></div>
+      <div class="card top-accent border-blue"><div class="eyebrow" style="margin-bottom:10px;">Step 08</div><h4>Track the project</h4><p>Follows status through <b>Contracted → In Progress → Completed</b> from the dashboard.</p></div>
+      <div class="card top-accent border-blue"><div class="eyebrow" style="margin-bottom:10px;">Step 09</div><h4>Rate the experience</h4><p>Rates the provider, then separately rates NEXORA on ease of use, matching quality, and support.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 07 PROVIDER JOURNEY -->
+<section class="sec cream" id="provider-journey">
+  <div class="wrap">
+    <span class="sec-index">08 / 29</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Provider Journey</p>
+      <h2 class="headline">From registration to a rated, repeatable revenue channel.</h2>
+    </div>
+    <div class="grid grid-3 reveal">
+      <div class="card top-accent border-teal"><div class="eyebrow" style="margin-bottom:10px;color:#0aa88b;">Step 01</div><h4>Register as a provider</h4><p>Company name, logo, description, location, services, specialisations, industries served, technologies, experience, past projects, pricing range, delivery time, team, portfolio links.</p></div>
+      <div class="card top-accent border-teal"><div class="eyebrow" style="margin-bottom:10px;color:#0aa88b;">Step 02</div><h4>Pending verification</h4><p>Account status is <b>Pending Verification</b> until reviewed by NEXORA administration.</p></div>
+      <div class="card top-accent border-teal"><div class="eyebrow" style="margin-bottom:10px;color:#0aa88b;">Step 03</div><h4>Profile goes live</h4><p>Once approved, a shareable public profile is published, marked <b>Verified by NEXORA</b>.</p></div>
+      <div class="card top-accent border-teal"><div class="eyebrow" style="margin-bottom:10px;color:#0aa88b;">Step 04</div><h4>Receive request invitations</h4><p>Notification: "You have a new request that matches your services."</p></div>
+      <div class="card top-accent border-teal"><div class="eyebrow" style="margin-bottom:10px;color:#0aa88b;">Step 05</div><h4>Accept, decline, or propose</h4><p>Responds with a full proposal — solution, price, timeline, scope, support, warranty, payment terms.</p></div>
+      <div class="card top-accent border-teal"><div class="eyebrow" style="margin-bottom:10px;color:#0aa88b;">Step 06</div><h4>Negotiate</h4><p>Uses internal messaging to clarify scope and terms directly with the customer.</p></div>
+      <div class="card top-accent border-teal"><div class="eyebrow" style="margin-bottom:10px;color:#0aa88b;">Step 07</div><h4>Get selected</h4><p>Notification of selection; project status moves to <b>Contracted → In Progress</b>.</p></div>
+      <div class="card top-accent border-teal"><div class="eyebrow" style="margin-bottom:10px;color:#0aa88b;">Step 08</div><h4>Deliver &amp; complete</h4><p>Tracks active and completed projects, customers, and revenue from the provider dashboard.</p></div>
+      <div class="card top-accent border-teal"><div class="eyebrow" style="margin-bottom:10px;color:#0aa88b;">Step 09</div><h4>Rate the customer</h4><p>Rates the customer's clarity, cooperation, and payment commitment — building the Client Reputation Score.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 08 PROVIDER SHOWCASE (NEW) -->
+<section class="sec dark" id="showcase">
+  <div class="wrap">
+    <span class="sec-index">09 / 29</span>
+    <div style="margin-bottom:20px;"><span class="tag tag-future">New — recommended addition</span></div>
+    <div class="section-head reveal">
+      <p class="eyebrow">Provider Showcase</p>
+      <h2 class="headline">A profile is not a listing — it has to <em>earn trust</em> in under a minute.</h2>
+      <p class="lede">Beyond the fields already scoped for provider registration, a stronger profile answers "can I trust this provider" fast — with proof, not just claims.</p>
+    </div>
+    <div class="grid grid-3 reveal">
+      <div class="card top-accent border-pink"><div class="icon bg-pink accent-pink"><svg class="ic"><use href="#i-trend"/></svg></div>
+        <h4>Case studies with outcomes</h4><p>Before/after metrics on past projects — e.g. "−40% response time" — not just a project title.</p></div>
+      <div class="card top-accent border-pink"><div class="icon bg-pink accent-pink"><svg class="ic"><use href="#i-video"/></svg></div>
+        <h4>Video intro / demo reel</h4><p>A 60–90 second provider intro, with an optional link to book a live product demo.</p></div>
+      <div class="card top-accent border-pink"><div class="icon bg-pink accent-pink"><svg class="ic"><use href="#i-award"/></svg></div>
+        <h4>Certifications &amp; partnerships</h4><p>OpenAI / Anthropic / AWS / Azure partner badges, team certifications and credentials.</p></div>
+      <div class="card top-accent border-pink"><div class="icon bg-pink accent-pink"><svg class="ic"><use href="#i-star"/></svg></div>
+        <h4>Client logos &amp; testimonials</h4><p>Shown with permission, alongside a breakdown of the star ratings behind the average.</p></div>
+      <div class="card top-accent border-pink"><div class="icon bg-pink accent-pink"><svg class="ic"><use href="#i-chart"/></svg></div>
+        <h4>Public performance stats</h4><p>Response time, acceptance rate, and completion rate — pulled from the same reputation data used internally.</p></div>
+      <div class="card top-accent border-pink"><div class="icon bg-pink accent-pink"><svg class="ic"><use href="#i-shield"/></svg></div>
+        <h4>Tiered verification badge</h4><p>Bronze / Silver / Gold / Platinum, based on depth of vetting — not a single binary "Verified" flag.</p></div>
+    </div>
+    <div class="note reveal">Public stats are governed by the same visibility policy defined in the Reputation section — sensitive details stay internal even when summary stats are surfaced.</div>
+  </div>
+</section>
+
+<!-- 09 ADMIN JOURNEY -->
+<section class="sec cream" id="admin-journey">
+  <div class="wrap">
+    <span class="sec-index">10 / 29</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">NEXORA Administration Journey</p>
+      <h2 class="headline">The oversight layer that keeps the marketplace trustworthy.</h2>
+    </div>
+    <div class="grid grid-4 reveal">
+      <div class="card"><div class="icon bg-blue accent-blue"><svg class="ic"><use href="#i-check"/></svg></div><h4>Verify providers</h4><p>Reviews registrations, approves, rejects, or suspends provider accounts.</p></div>
+      <div class="card"><div class="icon bg-teal accent-teal"><svg class="ic"><use href="#i-layers"/></svg></div><h4>Review requests</h4><p>Checks structured requests before release to matching; manages categories.</p></div>
+      <div class="card"><div class="icon bg-purple accent-purple"><svg class="ic"><use href="#i-scale"/></svg></div><h4>Handle disputes</h4><p>Intervenes in messaging when a disagreement or issue is flagged.</p></div>
+      <div class="card"><div class="icon bg-amber accent-amber"><svg class="ic"><use href="#i-chart"/></svg></div><h4>Monitor the platform</h4><p>Tracks transactions, commission, ratings, complaints, and analytics.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 AI ASSISTANT -->
+<section class="sec dark" id="ai-assistant">
+  <div class="wrap">
+    <span class="sec-index">11 / 29</span>
+    <div style="margin-bottom:20px;"><span class="tag tag-mvp">MVP — simplified</span></div>
+    <div class="section-head reveal">
+      <p class="eyebrow">AI-Assisted Request Creation</p>
+      <h2 class="headline">The request form, visualised — and how free text becomes a brief.</h2>
+      <p class="lede">A guided form captures everything the matching engine needs. An AI assistant helps customers who would rather describe the problem in their own words.</p>
+    </div>
+
+    <h3 class="subhead reveal">Request form blueprint</h3>
+    <div class="formblue reveal">
+      <div class="fb-grid">
+        <div class="fb-field full"><label>What problem do you want to solve?</label><div class="fb-input tall"></div></div>
+        <div class="fb-field"><label>Objective</label><div class="fb-input pill-row"><span class="fb-chip">Cost reduction</span><span class="fb-chip">Efficiency</span><span class="fb-chip">Growth</span></div></div>
+        <div class="fb-field"><label>Industry / Sector</label><div class="fb-input"></div></div>
+        <div class="fb-field"><label>Company size</label><div class="fb-input"></div></div>
+        <div class="fb-field"><label>Required service type</label><div class="fb-input"></div></div>
+        <div class="fb-field"><label>Approximate budget</label><div class="fb-input"></div></div>
+        <div class="fb-field"><label>Required timeline</label><div class="fb-input"></div></div>
+        <div class="fb-field"><label>Level of customisation</label><div class="fb-input"></div></div>
+        <div class="fb-field full"><label>Systems that may require integration</label><div class="fb-input"></div></div>
+        <div class="fb-field full"><label>File uploads (when required)</label><div class="fb-input" style="height:50px;"></div></div>
+        <div class="fb-field full"><label>Describe your requirements in detail</label><div class="fb-input tall"></div></div>
+      </div>
+    </div>
+
+    <h3 class="subhead reveal" style="margin-top:48px;">AI assistant flow</h3>
+    <div class="flow reveal">
+      <div class="flow-node"><div class="t">Free-text input</div><div class="d">"I want to reduce time employees spend responding to customers."</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">AI classification</div><div class="d">External AI service interprets intent</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Suggested structure</div><div class="d">Category: AI Customer Service · Solution: AI Agent</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Follow-up questions</div><div class="d">Asked only when needed</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Customer confirms</div><div class="d">Structured request is created</div></div>
+    </div>
+    <div class="note reveal">For the MVP, this uses a simple AI-assisted classification built on an external AI service (e.g. an LLM API). Development of a proprietary AI model is explicitly <b>not required</b>.</div>
+  </div>
+</section>
+
+<!-- 11 MATCHING -->
+<section class="sec cream" id="matching">
+  <div class="wrap">
+    <span class="sec-index">12 / 29</span>
+    <div style="margin-bottom:20px;display:flex;gap:10px;flex-wrap:wrap;"><span class="tag tag-mvp">MVP — rule-based</span><span class="tag tag-future">Future — AI matching engine</span></div>
+    <div class="section-head reveal">
+      <p class="eyebrow">Provider Matching</p>
+      <h2 class="headline">Explainable in the MVP. Intelligent in the <em>future</em>.</h2>
+      <p class="lede">The MVP ranks eligible, verified providers using weighted, transparent criteria — reviewed by NEXORA staff before invitations go out.</p>
+    </div>
+    <div class="reveal">
+      <div class="wbar-row"><span class="name">Service match</span><div class="wbar-track"><div class="wbar-fill" style="width:92%"></div></div><span class="pct">high</span></div>
+      <div class="wbar-row"><span class="name">Industry fit</span><div class="wbar-track"><div class="wbar-fill" style="width:82%"></div></div><span class="pct">high</span></div>
+      <div class="wbar-row"><span class="name">Verification status</span><div class="wbar-track"><div class="wbar-fill" style="width:78%"></div></div><span class="pct">high</span></div>
+      <div class="wbar-row"><span class="name">Rating</span><div class="wbar-track"><div class="wbar-fill" style="width:70%"></div></div><span class="pct">med</span></div>
+      <div class="wbar-row"><span class="name">Budget alignment</span><div class="wbar-track"><div class="wbar-fill" style="width:65%"></div></div><span class="pct">med</span></div>
+      <div class="wbar-row"><span class="name">Technology match</span><div class="wbar-track"><div class="wbar-fill" style="width:58%"></div></div><span class="pct">med</span></div>
+      <div class="wbar-row"><span class="name">Experience</span><div class="wbar-track"><div class="wbar-fill" style="width:52%"></div></div><span class="pct">med</span></div>
+      <div class="wbar-row"><span class="name">Location</span><div class="wbar-track"><div class="wbar-fill" style="width:40%"></div></div><span class="pct">low</span></div>
+      <div class="wbar-row"><span class="name">Response time history</span><div class="wbar-track"><div class="wbar-fill" style="width:35%"></div></div><span class="pct">low</span></div>
+    </div>
+    <p class="lede reveal" style="margin-top:16px;"><span class="tag tag-example">Illustrative weighting</span> — shown for discussion only; the final model is configured by NEXORA administration and can be adjusted per category.</p>
+  </div>
+</section>
+
+<!-- 12 TWO WAYS TO DISCOVER (NEW) -->
+<section class="sec dark" id="discover">
+  <div class="wrap">
+    <span class="sec-index">13 / 29</span>
+    <div style="margin-bottom:20px;"><span class="tag tag-future">New — recommended addition</span></div>
+    <div class="section-head reveal">
+      <p class="eyebrow">Discovery Model</p>
+      <h2 class="headline">Two ways to find a partner — not just <em>one</em>.</h2>
+      <p class="lede">The original flow assumes every customer needs a guided request. Many already know exactly what they want and should be able to browse directly.</p>
+    </div>
+    <div class="grid grid-2 reveal">
+      <div class="card top-accent border-blue"><div class="icon bg-blue accent-blue"><svg class="ic"><use href="#i-inbox"/></svg></div>
+        <h4>Guided / Managed <span class="tag tag-mvp" style="margin-left:6px;">MVP</span></h4>
+        <p>Submit a request → NEXORA matches &amp; invites providers → compare proposals. Best for buyers who don't yet know what solution they need.</p></div>
+      <div class="card top-accent border-teal"><div class="icon bg-teal accent-teal"><svg class="ic"><use href="#i-search"/></svg></div>
+        <h4>Self-Serve Discovery <span class="tag tag-future" style="margin-left:6px;">Optional enhancement</span></h4>
+        <p>Browse verified providers by category, industry, technology, or rating — contact directly, or invite one to an existing request. Best for buyers who already know the solution type.</p></div>
+    </div>
+    <h3 class="subhead reveal" style="margin-top:44px;">Provider apply-to-request <span class="tag tag-future" style="margin-left:6px;">Future phase</span></h3>
+    <p class="lede reveal">Beyond invitation-only matching, a customer could optionally mark a request as <b>Open to Applications</b> — letting interested providers apply directly, alongside NEXORA's matched shortlist.</p>
+    <div class="flow reveal" style="margin-top:14px;">
+      <div class="flow-node"><div class="t">Request created</div><div class="d">Customer chooses Invite-Only or Open</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">NEXORA matches</div><div class="d">Shortlist invited automatically</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Providers apply</div><div class="d">Only if request is Open</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Combined view</div><div class="d">Invited + applied, same comparison flow</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 13 PROPOSALS -->
+<section class="sec cream" id="proposals">
+  <div class="wrap">
+    <span class="sec-index">14 / 29</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Provider Invitations &amp; Proposals</p>
+      <h2 class="headline">A shortlist is invited. Only real proposals reach the customer.</h2>
+    </div>
+    <div class="grid grid-2 reveal">
+      <div class="card top-accent border-blue"><h4>Invitation</h4><p>Selected providers receive: "You have a new request that matches your services." They may <b>Accept</b>, <b>Decline</b>, or move to <b>Submit Proposal</b>.</p></div>
+      <div class="card top-accent border-teal"><h4>Proposal contents</h4><p>Proposed solution, price, delivery timeline, scope of work, support terms, warranty, payment terms, attachments, and additional notes.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 14 COMPARISON -->
+<section class="sec dark" id="compare">
+  <div class="wrap">
+    <span class="sec-index">15 / 29</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Proposal Comparison</p>
+      <h2 class="headline">Every proposal, one screen, no spreadsheets.</h2>
+      <p class="lede">Sample layout below — values are illustrative to demonstrate the comparison experience, not a pricing recommendation.</p>
+    </div>
+    <div class="tblwrap reveal">
+      <table class="cmp">
+        <thead><tr><th>Provider</th><th>Price <span class="tag tag-example" style="margin-left:6px;">example</span></th><th>Timeline</th><th>Rating</th><th>Specialisation</th></tr></thead>
+        <tbody>
+          <tr><td>Provider A</td><td class="hi">SAR 50,000</td><td>30 days</td><td>4.8 ★</td><td>AI Agents</td></tr>
+          <tr><td>Provider B</td><td class="hi">SAR 65,000</td><td>25 days</td><td>4.7 ★</td><td>Automation</td></tr>
+          <tr><td>Provider C</td><td class="hi">SAR 45,000</td><td>40 days</td><td>4.5 ★</td><td>Customer Service</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lede reveal" style="margin-top:16px;">A dedicated <b>Compare Proposals</b> view lets the customer weigh price, timeline, rating, and specialisation before opening any proposal in full detail.</p>
+  </div>
+</section>
+
+<!-- 15 MESSAGING -->
+<section class="sec cream" id="messaging">
+  <div class="wrap">
+    <span class="sec-index">16 / 29</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Messaging &amp; Negotiation</p>
+      <h2 class="headline">A direct channel, with NEXORA able to step in.</h2>
+    </div>
+    <div class="flow reveal">
+      <div class="flow-node"><div class="t">Text &amp; files</div><div class="d">Core conversation between customer and provider</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Images / attachments</div><div class="d">Supporting material where required</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Notifications</div><div class="d">New message alerts on both sides</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Admin intervention</div><div class="d">NEXORA can step into a thread on dispute</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 16 STATUS WORKFLOWS -->
+<section class="sec dark" id="statuses">
+  <div class="wrap">
+    <span class="sec-index">17 / 29</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Status Workflows</p>
+      <h2 class="headline">Four tracks, kept deliberately separate.</h2>
+      <p class="lede">Mixing request, proposal, project, and verification states into one workflow creates confusion. NEXORA keeps them distinct.</p>
+    </div>
+    <div class="reveal" style="margin-bottom:30px;">
+      <div class="track-label">Request status</div>
+      <div class="track">
+        <span class="st" style="background:rgba(26,86,255,0.1);border-color:rgba(26,86,255,0.3);color:#6d94ff;">New</span><span class="sep">›</span>
+        <span class="st" style="background:rgba(26,86,255,0.1);border-color:rgba(26,86,255,0.3);color:#6d94ff;">Under Review</span><span class="sep">›</span>
+        <span class="st" style="background:rgba(26,86,255,0.1);border-color:rgba(26,86,255,0.3);color:#6d94ff;">Matched</span><span class="sep">›</span>
+        <span class="st" style="background:rgba(26,86,255,0.1);border-color:rgba(26,86,255,0.3);color:#6d94ff;">Proposals Received</span><span class="sep">›</span>
+        <span class="st" style="background:rgba(26,86,255,0.1);border-color:rgba(26,86,255,0.3);color:#6d94ff;">Under Negotiation</span><span class="sep">›</span>
+        <span class="st" style="background:rgba(26,86,255,0.1);border-color:rgba(26,86,255,0.3);color:#6d94ff;">Provider Selected</span><span class="sep">›</span>
+        <span class="st" style="background:rgba(26,86,255,0.1);border-color:rgba(26,86,255,0.3);color:#6d94ff;">Contracted</span><span class="sep">›</span>
+        <span class="st" style="background:rgba(26,86,255,0.1);border-color:rgba(26,86,255,0.3);color:#6d94ff;">In Progress</span><span class="sep">›</span>
+        <span class="st" style="background:rgba(26,86,255,0.1);border-color:rgba(26,86,255,0.3);color:#6d94ff;">Completed</span><span class="sep">›</span>
+        <span class="st" style="background:rgba(26,86,255,0.1);border-color:rgba(26,86,255,0.3);color:#6d94ff;">Rated</span>
+      </div>
+    </div>
+    <div class="reveal" style="margin-bottom:30px;">
+      <div class="track-label">Proposal status <span class="tag tag-assumption" style="margin-left:8px;">recommended</span></div>
+      <div class="track">
+        <span class="st" style="background:rgba(0,201,167,0.1);border-color:rgba(0,201,167,0.3);color:#4fe0c4;">Submitted</span><span class="sep">›</span>
+        <span class="st" style="background:rgba(0,201,167,0.1);border-color:rgba(0,201,167,0.3);color:#4fe0c4;">Under Review</span><span class="sep">›</span>
+        <span class="st" style="background:rgba(0,201,167,0.1);border-color:rgba(0,201,167,0.3);color:#4fe0c4;">Shortlisted</span><span class="sep">›</span>
+        <span class="st" style="background:rgba(0,201,167,0.1);border-color:rgba(0,201,167,0.3);color:#4fe0c4;">Accepted</span><span class="sep">/</span>
+        <span class="st" style="background:rgba(0,201,167,0.1);border-color:rgba(0,201,167,0.3);color:#4fe0c4;">Declined</span>
+      </div>
+    </div>
+    <div class="reveal" style="margin-bottom:30px;">
+      <div class="track-label">Project status <span class="tag tag-assumption" style="margin-left:8px;">recommended</span></div>
+      <div class="track">
+        <span class="st" style="background:rgba(139,92,246,0.1);border-color:rgba(139,92,246,0.3);color:#b39bfb;">Not Started</span><span class="sep">›</span>
+        <span class="st" style="background:rgba(139,92,246,0.1);border-color:rgba(139,92,246,0.3);color:#b39bfb;">In Progress</span><span class="sep">›</span>
+        <span class="st" style="background:rgba(139,92,246,0.1);border-color:rgba(139,92,246,0.3);color:#b39bfb;">Delivered</span><span class="sep">›</span>
+        <span class="st" style="background:rgba(139,92,246,0.1);border-color:rgba(139,92,246,0.3);color:#b39bfb;">Completed</span><span class="sep">/</span>
+        <span class="st" style="background:rgba(139,92,246,0.1);border-color:rgba(139,92,246,0.3);color:#b39bfb;">Cancelled</span>
+      </div>
+    </div>
+    <div class="reveal">
+      <div class="track-label">Provider verification status</div>
+      <div class="track">
+        <span class="st" style="background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.3);color:#ffc266;">Pending Verification</span><span class="sep">›</span>
+        <span class="st" style="background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.3);color:#ffc266;">Under Review</span><span class="sep">›</span>
+        <span class="st" style="background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.3);color:#ffc266;">Verified</span><span class="sep">/</span>
+        <span class="st" style="background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.3);color:#ffc266;">Rejected</span><span class="sep">›</span>
+        <span class="st" style="background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.3);color:#ffc266;">Suspended</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 17 REPUTATION -->
+<section class="sec cream" id="reputation">
+  <div class="wrap">
+    <span class="sec-index">18 / 29</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Reputation &amp; Rating System</p>
+      <h2 class="headline">Four rating directions build the <em>NEXORA Trust Layer</em>.</h2>
+      <p class="lede">Ratings are structured signals designed to inform matching, and to protect both sides from bad-faith behaviour.</p>
+    </div>
+    <div class="grid grid-4 reveal">
+      <div class="card top-accent border-blue"><div class="eyebrow" style="margin-bottom:12px;color:#1a56ff;">01 · Cust. → Provider</div>
+        <h4>Delivery quality</h4><ul class="checklist"><li><span class="ck">•</span>Solution &amp; execution quality</li><li><span class="ck">•</span>Timeliness &amp; responsiveness</li><li><span class="ck">•</span>Value for money</li></ul></div>
+      <div class="card top-accent border-teal"><div class="eyebrow" style="margin-bottom:12px;color:#0aa88b;">02 · Provider → Cust.</div>
+        <h4>Client Reputation Score</h4><ul class="checklist"><li><span class="ck">•</span>Clarity of requirements</li><li><span class="ck">•</span>Cooperation &amp; scope respect</li><li><span class="ck">•</span>Payment commitment</li></ul></div>
+      <div class="card top-accent border-purple"><div class="eyebrow" style="margin-bottom:12px;color:#7c4ee8;">03 · Cust. → NEXORA</div>
+        <h4>Platform experience</h4><ul class="checklist"><li><span class="ck">•</span>Ease of use &amp; clarity</li><li><span class="ck">•</span>Quality of recommended providers</li><li><span class="ck">•</span>Trust &amp; security</li></ul></div>
+      <div class="card top-accent border-amber"><div class="eyebrow" style="margin-bottom:12px;color:#c9790a;">04 · Provider → NEXORA</div>
+        <h4>Marketplace fairness</h4><ul class="checklist"><li><span class="ck">•</span>Matching accuracy</li><li><span class="ck">•</span>Commission transparency</li><li><span class="ck">•</span>Fairness of the rating system</li></ul></div>
+    </div>
+
+    <h3 class="subhead reveal" style="margin-top:48px;">Double-blind review mechanism</h3>
+    <p class="lede reveal">Neither party sees the other's rating until <b>both</b> have submitted theirs — removing the incentive for retaliatory or courtesy ratings.</p>
+    <div class="blind reveal">
+      <div class="blind-card"><svg class="ic accent-blue" style="width:22px;height:22px;margin:0 auto 8px;"><use href="#i-lock"/></svg><div style="font-family:var(--font-display);font-weight:800;">Customer rating</div><div style="font-size:.76rem;color:var(--ink-faint);margin-top:4px;">submitted, hidden</div></div>
+      <div class="blind-mid">Both submitted<br>↓<br>Unlocks together</div>
+      <div class="blind-card"><svg class="ic accent-teal" style="width:22px;height:22px;margin:0 auto 8px;"><use href="#i-lock"/></svg><div style="font-family:var(--font-display);font-weight:800;">Provider rating</div><div style="font-size:.76rem;color:var(--ink-faint);margin-top:4px;">submitted, hidden</div></div>
+    </div>
+    <ul class="checklist reveal" style="margin-top:32px;max-width:640px;">
+      <li><span class="ck">✓</span>Only participants in a completed project can rate it</li>
+      <li><span class="ck">✓</span>Ratings are linked to real transactions, with recorded timestamps</li>
+      <li><span class="ck">✓</span>Fake, duplicate, or abusive ratings can be reported and reviewed by admins</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 18 DASHBOARDS -->
+<section class="sec dark" id="dashboards">
+  <div class="wrap">
+    <span class="sec-index">19 / 29</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Dashboards</p>
+      <h2 class="headline">Three purpose-built control centres.</h2>
+    </div>
+    <div class="grid grid-3 reveal">
+      <div>
+        <h3 class="subhead">Customer</h3>
+        <div class="mock"><div class="mock-bar"><span class="mock-dot" style="background:#ff5f56;"></span><span class="mock-dot" style="background:#ffbd2e;"></span><span class="mock-dot" style="background:#27c93f;"></span></div>
+          <div class="mock-body"><div class="mock-nav">
+            <div class="mi on">Overview</div><div class="mi">My Requests</div><div class="mi">Proposals</div><div class="mi">Compare</div>
+            <div class="mi">Messages</div><div class="mi">Projects</div><div class="mi">Ratings</div></div>
+            <div class="mock-main"><div class="block tall"></div><div class="block"></div><div class="block"></div></div>
+          </div></div>
+      </div>
+      <div>
+        <h3 class="subhead">Provider</h3>
+        <div class="mock"><div class="mock-bar"><span class="mock-dot" style="background:#ff5f56;"></span><span class="mock-dot" style="background:#ffbd2e;"></span><span class="mock-dot" style="background:#27c93f;"></span></div>
+          <div class="mock-body"><div class="mock-nav">
+            <div class="mi">Overview</div><div class="mi on">New Requests</div><div class="mi">My Proposals</div><div class="mi">Active Projects</div>
+            <div class="mi">Messages</div><div class="mi">Revenue</div><div class="mi">Ratings</div></div>
+            <div class="mock-main"><div class="block tall"></div><div class="block"></div><div class="block"></div></div>
+          </div></div>
+      </div>
+      <div>
+        <h3 class="subhead">Admin</h3>
+        <div class="mock"><div class="mock-bar"><span class="mock-dot" style="background:#ff5f56;"></span><span class="mock-dot" style="background:#ffbd2e;"></span><span class="mock-dot" style="background:#27c93f;"></span></div>
+          <div class="mock-body"><div class="mock-nav">
+            <div class="mi">Users</div><div class="mi on">Providers</div><div class="mi">Requests</div><div class="mi">Proposals</div>
+            <div class="mi">Transactions</div><div class="mi">Reviews</div><div class="mi">Analytics</div></div>
+            <div class="mock-main"><div class="block tall"></div><div class="block"></div><div class="block"></div></div>
+          </div></div>
+      </div>
+    </div>
+    <p class="lede reveal" style="margin-top:28px;"><span class="tag tag-future">Future phase</span> Customer dashboard adds Contracts and Payments once online payments are scoped.</p>
+  </div>
+</section>
+
+<!-- 19 PRODUCT BREAKDOWN (NEW) -->
+<section class="sec cream" id="products">
+  <div class="wrap">
+    <span class="sec-index">20 / 29</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">System &amp; Product Breakdown</p>
+      <h2 class="headline">How many products are we actually building?</h2>
+      <p class="lede">Three real products on one shared foundation — plus a single open decision on where the public website lives. The Customer and Provider dashboards shown in the previous section aren't two builds; they're one product with two role-based views.</p>
+    </div>
+
+    <div class="reveal" style="max-width:520px;margin:0 auto 0;">
+      <div class="card" style="border:1.5px dashed rgba(245,158,11,0.5);background:rgba(245,158,11,0.05);text-align:center;">
+        <div class="icon bg-amber accent-amber" style="margin:0 auto 14px;"><svg class="ic"><use href="#i-globe"/></svg></div>
+        <h4>Marketing Website</h4>
+        <p>Home, About, How It Works, FAQs, Contact, Login/Signup — the public-facing pages from the original brief.</p>
+        <div style="margin-top:12px;"><span class="tag tag-open">Decision needed — see below</span></div>
+      </div>
+      <div style="text-align:center;color:var(--ink-faint);font-family:var(--font-mono);font-size:11px;padding:10px 0;">↓ merge in, or keep separate ↓</div>
+    </div>
+
+    <div class="reveal" style="max-width:920px;margin:0 auto;">
+      <div class="card top-accent border-blue">
+        <div class="icon bg-blue accent-blue"><svg class="ic"><use href="#i-users"/></svg></div>
+        <h4>Marketplace Web App</h4>
+        <p>One application, two role-based panels sharing the same login system and codebase.</p>
+        <div class="pyramid">
+          <div class="pyr-root">Marketplace Web App</div>
+          <div class="pyr-stem"></div>
+          <div class="pyr-branches">
+            <div class="pyr-branch">
+              <div class="pyr-node blue">Buyer Panel</div>
+              <div class="pyr-leaves">
+                <span class="pyr-chip">Overview</span><span class="pyr-chip">My Requests</span><span class="pyr-chip">Proposals</span>
+                <span class="pyr-chip">Compare</span><span class="pyr-chip">Messages</span><span class="pyr-chip">Projects</span>
+                <span class="pyr-chip">Ratings</span>
+              </div>
+            </div>
+            <div class="pyr-branch">
+              <div class="pyr-node teal">Provider Panel</div>
+              <div class="pyr-leaves">
+                <span class="pyr-chip">Overview</span><span class="pyr-chip">New Requests</span><span class="pyr-chip">My Proposals</span>
+                <span class="pyr-chip">Active Projects</span><span class="pyr-chip">Messages</span><span class="pyr-chip">Revenue</span>
+                <span class="pyr-chip">Ratings</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="reveal" style="max-width:520px;margin:20px auto 0;">
+      <div class="card top-accent border-purple">
+        <div class="icon bg-purple accent-purple"><svg class="ic"><use href="#i-shield"/></svg></div>
+        <h4>Admin Dashboard</h4>
+        <p>A separate application for NEXORA staff only — its own login, its own access, never public-facing.</p>
+        <div class="pyramid">
+          <div class="pyr-root">Admin Dashboard</div>
+          <div class="pyr-stem"></div>
+          <div class="pyr-leaves" style="max-width:340px;">
+            <span class="pyr-chip">Users</span><span class="pyr-chip">Providers</span><span class="pyr-chip">Requests</span>
+            <span class="pyr-chip">Proposals</span><span class="pyr-chip">Transactions</span><span class="pyr-chip">Reviews</span>
+            <span class="pyr-chip">Analytics</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;color:var(--ink-faint);font-family:var(--font-mono);font-size:11px;padding:10px 0;">↓ both run on ↓</div>
+
+    <div class="reveal" style="max-width:760px;margin:0 auto;">
+      <div class="card top-accent border-teal" style="text-align:center;">
+        <div class="icon bg-teal accent-teal" style="margin:0 auto 14px;"><svg class="ic"><use href="#i-layers"/></svg></div>
+        <h4>Backend / API — the shared engine</h4>
+        <p>One database, one set of business rules. Not a fourth product priced separately — it's the foundation the Marketplace, the Admin Dashboard, and (if merged) the Website all run on.</p>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <h3 class="subhead reveal">What this means for scope</h3>
+    <ul class="checklist reveal" style="max-width:700px;">
+      <li><span class="ck">✓</span><b>1 Marketplace web app</b> — buyer and provider panels combined, role-based, not two separate builds</li>
+      <li><span class="ck">✓</span><b>1 Admin Dashboard</b> — internal tool, architecturally separate from the marketplace</li>
+      <li><span class="ck">✓</span><b>1 Backend / API</b> — shared foundation, priced once, not per product</li>
+      <li><span class="ck">✓</span><b>1 Marketing website</b> — open decision: built inside the Marketplace app, or as a fully separate site</li>
+      <li><span class="ck">✓</span><b>Native mobile app</b> — explicitly future-phase (see Roadmap), not counted in this breakdown</li>
+    </ul>
+    <div class="note">Website inside the Marketplace app is faster to build and easier to maintain (one codebase, one deployment). A fully separate website gives more flexibility for marketing/SEO and can use lighter, cheaper hosting — but means two codebases to keep in sync. This decision is also listed under Categories, Market &amp; Identity in the Decisions Needed section.</div>
+  </div>
+</section>
+
+<!-- 20 NOTIFICATIONS -->
+<section class="sec cream" id="notify">
+  <div class="wrap">
+    <span class="sec-index">21 / 29</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Notifications &amp; Integrations</p>
+      <h2 class="headline">Every state change reaches the right person, on the right channel.</h2>
+    </div>
+    <div class="reveal">
+      <div class="pill-group">
+        <div class="pill-group-head"><span class="pill-dot" style="background:var(--blue);"></span><span class="pill-group-label">Notification Channels — MVP</span><span class="pill-group-line"></span></div>
+        <div class="pill-row">
+          <span class="pill" style="background:rgba(26,86,255,0.07);border-color:rgba(26,86,255,0.25);color:var(--blue);">Email</span>
+          <span class="pill" style="background:rgba(26,86,255,0.07);border-color:rgba(26,86,255,0.25);color:var(--blue);">SMS</span>
+          <span class="pill" style="background:rgba(26,86,255,0.07);border-color:rgba(26,86,255,0.25);color:var(--blue);">In-Platform</span>
+        </div>
+      </div>
+      <div class="pill-group">
+        <div class="pill-group-head"><span class="pill-dot" style="background:var(--purple);"></span><span class="pill-group-label">Notification Channels — Future</span><span class="pill-group-line"></span></div>
+        <div class="pill-row"><span class="pill" style="background:rgba(139,92,246,0.07);border-color:rgba(139,92,246,0.25);color:#7c4ee8;">Push Notifications</span></div>
+      </div>
+      <div class="pill-group">
+        <div class="pill-group-head"><span class="pill-dot" style="background:var(--teal);"></span><span class="pill-group-label">Third-Party Integrations — priced separately</span><span class="pill-group-line"></span></div>
+        <div class="pill-row">
+          <span class="pill" style="background:rgba(0,201,167,0.07);border-color:rgba(0,201,167,0.25);color:#0aa88b;">Payment Gateway</span>
+          <span class="pill" style="background:rgba(0,201,167,0.07);border-color:rgba(0,201,167,0.25);color:#0aa88b;">SMS</span>
+          <span class="pill" style="background:rgba(0,201,167,0.07);border-color:rgba(0,201,167,0.25);color:#0aa88b;">Email</span>
+          <span class="pill" style="background:rgba(0,201,167,0.07);border-color:rgba(0,201,167,0.25);color:#0aa88b;">Cloud Storage</span>
+          <span class="pill" style="background:rgba(0,201,167,0.07);border-color:rgba(0,201,167,0.25);color:#0aa88b;">AI APIs</span>
+        </div>
+      </div>
+      <div class="pill-group">
+        <div class="pill-group-head"><span class="pill-dot" style="background:var(--amber);"></span><span class="pill-group-label">Integrations — Future</span><span class="pill-group-line"></span></div>
+        <div class="pill-row">
+          <span class="pill" style="background:rgba(245,158,11,0.07);border-color:rgba(245,158,11,0.25);color:#c9790a;">WhatsApp</span>
+          <span class="pill" style="background:rgba(245,158,11,0.07);border-color:rgba(245,158,11,0.25);color:#c9790a;">CRM</span>
+          <span class="pill" style="background:rgba(245,158,11,0.07);border-color:rgba(245,158,11,0.25);color:#c9790a;">Calendar</span>
+        </div>
+      </div>
+    </div>
+    <p class="lede reveal" style="margin-top:24px;max-width:760px;">Example triggers: "Your request has been received" · "A new proposal has been received" · "You have a new message" · "You have been selected to execute the project."</p>
+  </div>
+</section>
+
+<!-- 20 SECURITY -->
+<section class="sec dark" id="security">
+  <div class="wrap">
+    <span class="sec-index">22 / 29</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Security &amp; Access Control</p>
+      <h2 class="headline">Trust is a technical property, not just a promise.</h2>
+    </div>
+    <div class="reveal">
+      <div class="pill-group">
+        <div class="pill-group-head"><span class="pill-dot" style="background:var(--red);"></span><span class="pill-group-label">Authentication &amp; Access</span><span class="pill-group-line"></span></div>
+        <div class="pill-row">
+          <span class="pill" style="background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.25);color:#ff9494;">SSL / TLS</span>
+          <span class="pill" style="background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.25);color:#ff9494;">Password Encryption</span>
+          <span class="pill" style="background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.25);color:#ff9494;">OTP Verification</span>
+          <span class="pill" style="background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.25);color:#ff9494;">Role-Based Access Control</span>
+        </div>
+      </div>
+      <div class="pill-group">
+        <div class="pill-group-head"><span class="pill-dot" style="background:var(--pink);"></span><span class="pill-group-label">Data &amp; Platform Integrity</span><span class="pill-group-line"></span></div>
+        <div class="pill-row">
+          <span class="pill" style="background:rgba(236,72,153,0.08);border-color:rgba(236,72,153,0.25);color:#ff9ac4;">API Security</span>
+          <span class="pill" style="background:rgba(236,72,153,0.08);border-color:rgba(236,72,153,0.25);color:#ff9ac4;">Scheduled Backups</span>
+          <span class="pill" style="background:rgba(236,72,153,0.08);border-color:rgba(236,72,153,0.25);color:#ff9ac4;">Admin Audit Logging</span>
+          <span class="pill" style="background:rgba(236,72,153,0.08);border-color:rgba(236,72,153,0.25);color:#ff9ac4;">Database Security</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 21 LANGUAGE -->
+<section class="sec cream" id="language">
+  <div class="wrap">
+    <span class="sec-index">23 / 29</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Arabic &amp; English</p>
+      <h2 class="headline">Bilingual from day one, RTL and LTR both first-class.</h2>
+    </div>
+    <div class="grid grid-2 reveal">
+      <div class="card"><h4 style="direction:ltr;">English — LTR</h4>
+        <div class="mock" style="margin-top:12px;"><div class="mock-bar" style="justify-content:flex-start;"><span class="mock-dot" style="background:#ff5f56;"></span><span class="mock-dot" style="background:#ffbd2e;"></span></div>
+          <div class="mock-body" style="height:100px;"><div class="mock-nav" style="border-right:1px solid var(--line-soft);border-left:none;"></div>
+            <div class="mock-main"><div class="block" style="grid-column:1/-1;"></div></div></div></div></div>
+      <div class="card"><h4 style="direction:rtl;text-align:right;">العربية — RTL</h4>
+        <div class="mock" style="margin-top:12px;direction:rtl;"><div class="mock-bar" style="justify-content:flex-end;"><span class="mock-dot" style="background:#ff5f56;"></span><span class="mock-dot" style="background:#ffbd2e;"></span></div>
+          <div class="mock-body" style="height:100px;"><div class="mock-nav" style="border-left:1px solid rgba(5,5,10,0.08);border-right:none;"></div>
+            <div class="mock-main"><div class="block" style="grid-column:1/-1;"></div></div></div></div></div>
+    </div>
+    <p class="lede reveal" style="margin-top:22px;">Layout, navigation, and forms mirror correctly in both directions. Additional languages can be added on the same architecture in future phases.</p>
+  </div>
+</section>
+
+<!-- 22 SUBSCRIPTION & PROMOTION (NEW) -->
+<section class="sec dark" id="promotion">
+  <div class="wrap">
+    <span class="sec-index">24 / 29</span>
+    <div style="margin-bottom:20px;"><span class="tag tag-future">Future phase — recommended for discussion</span></div>
+    <div class="section-head reveal">
+      <p class="eyebrow">Provider Subscription &amp; Promotion</p>
+      <h2 class="headline">Should providers be able to <em>pay for visibility</em>?</h2>
+      <p class="lede">A natural monetization layer once the marketplace has liquidity — presented here as a recommendation for discussion, not yet scoped into the MVP.</p>
+    </div>
+    <div class="grid grid-3 reveal">
+      <div class="term">
+        <div class="term-head"><span class="term-dot" style="background:var(--txt-faint);"></span><span class="term-title">Free</span><span class="term-count">baseline</span></div>
+        <div class="term-body">
+          <div class="term-row"><span class="chk solid" style="color:var(--txt-faint);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Public profile listing</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--txt-faint);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Standard matching eligibility</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--txt-faint);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Basic performance stats</span></div>
+        </div>
+      </div>
+      <div class="term">
+        <div class="term-head"><span class="term-dot" style="background:var(--amber);"></span><span class="term-title" style="color:#ffc266;">Pro</span><span class="term-count">paid</span></div>
+        <div class="term-body">
+          <div class="term-row"><span class="chk solid" style="color:var(--amber);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Everything in Free</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--amber);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Priority placement in browse &amp; search</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--amber);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Extended analytics dashboard</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--amber);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">"Pro" badge on profile</span></div>
+        </div>
+      </div>
+      <div class="term">
+        <div class="term-head"><span class="term-dot" style="background:var(--purple);"></span><span class="term-title" style="color:#b39bfb;">Enterprise</span><span class="term-count">paid</span></div>
+        <div class="term-body">
+          <div class="term-row"><span class="chk solid" style="color:var(--purple);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Everything in Pro</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--purple);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Category sponsorship</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--purple);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Dedicated account manager</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--purple);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Homepage feature rotation</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="note critical reveal" style="margin-top:28px;"><b>Integrity boundary — needs NEXORA sign-off:</b> paid placement should only affect visibility in browse/search results — never the objective weighted score used to select and rank providers for an actual customer request. Mixing the two would undermine the matching engine's core promise: explainable, unbiased matching.</div>
+    <p class="lede reveal" style="margin-top:20px;"><span class="tag tag-open">Open decision</span> An alternative or complementary model: <b>lead credits</b> — providers get a number of free invitations per month and pay per additional lead, instead of (or alongside) flat subscription tiers.</p>
+  </div>
+</section>
+
+<!-- 23 ROADMAP -->
+<section class="sec dark" id="roadmap">
+  <div class="wrap">
+    <span class="sec-index">25 / 29</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">MVP Roadmap</p>
+      <h2 class="headline">Three layers. Unmistakably <em>separated</em>.</h2>
+      <p class="lede">The objective is a scalable architecture and a launchable MVP that validates the NEXORA business model — not every advanced feature on day one.</p>
+    </div>
+    <div class="grid grid-3 reveal">
+      <div class="term">
+        <div class="term-head"><span class="term-dot" style="background:var(--blue);"></span><span class="term-title" style="color:#6d94ff;">Core MVP</span><span class="term-count">13 items</span></div>
+        <div class="term-body">
+          <div class="term-row"><span class="chk solid" style="color:var(--blue);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Registration + verification</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--blue);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Categories &amp; provider profiles</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--blue);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Guided request + simple AI assistant</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--blue);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Rule-based matching + admin review</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--blue);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Invitations, proposals, comparison</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--blue);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Saved / shortlisted providers</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--blue);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Messaging + status workflow</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--blue);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Double-blind mutual ratings</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--blue);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">3 dashboards + notifications</span></div>
+          <div class="term-row"><span class="chk solid" style="color:var(--blue);"><svg class="ic"><use href="#i-check"/></svg></span><span class="lbl">Arabic + English, RTL/LTR</span></div>
+        </div>
+      </div>
+      <div class="term">
+        <div class="term-head"><span class="term-dot" style="background:var(--amber);"></span><span class="term-title" style="color:#ffc266;">Optional Enhancements</span><span class="term-count">6 items</span></div>
+        <div class="term-body">
+          <div class="term-row dim"><span class="chk outline"></span><span class="lbl">Online payment gateway</span></div>
+          <div class="term-row dim"><span class="chk outline"></span><span class="lbl">Basic analytics dashboards</span></div>
+          <div class="term-row dim"><span class="chk outline"></span><span class="lbl">Self-serve provider browse &amp; search</span></div>
+          <div class="term-row dim"><span class="chk outline"></span><span class="lbl">Provider apply-to-request (open requests)</span></div>
+          <div class="term-row dim"><span class="chk outline"></span><span class="lbl">Multi-level provider verification</span></div>
+        </div>
+      </div>
+      <div class="term">
+        <div class="term-head"><span class="term-dot" style="background:var(--purple);"></span><span class="term-title" style="color:#b39bfb;">Future Phases</span><span class="term-count">12 items</span></div>
+        <div class="term-body">
+          <div class="term-row dim"><span class="chk outline"></span><span class="lbl">AI matching engine</span></div>
+          <div class="term-row dim"><span class="chk outline"></span><span class="lbl">Provider subscription tiers</span></div>
+          <div class="term-row dim"><span class="chk outline"></span><span class="lbl">Promoted / sponsored placement</span></div>
+          <div class="term-row dim"><span class="chk outline"></span><span class="lbl">Escrow-protected payments</span></div>
+          <div class="term-row dim"><span class="chk outline"></span><span class="lbl">Contract &amp; SOW template library</span></div>
+          <div class="term-row dim"><span class="chk outline"></span><span class="lbl">Milestone-based project tracking</span></div>
+          <div class="term-row dim"><span class="chk outline"></span><span class="lbl">WhatsApp / CRM / calendar</span></div>
+          <div class="term-row dim"><span class="chk outline"></span><span class="lbl">iOS &amp; Android apps</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 24 OWNERSHIP -->
+<section class="sec cream" id="handover">
+  <div class="wrap">
+    <span class="sec-index">26 / 29</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Technical Ownership &amp; Handover</p>
+      <h2 class="headline">Nothing about NEXORA is locked to its development vendor.</h2>
+      <p class="lede">A contractual requirement, not a courtesy: once project fees are settled, every NEXORA-specific asset is handed over in full.</p>
+    </div>
+    <div class="grid grid-2 reveal">
+      <div class="card top-accent border-blue"><h4>Delivered to NEXORA</h4>
+        <ul class="checklist">
+          <li><span class="ck">✓</span>Full source code &amp; repository access</li>
+          <li><span class="ck">✓</span>Database &amp; its schema</li>
+          <li><span class="ck">✓</span>UI/UX &amp; design files</li>
+          <li><span class="ck">✓</span>Technical, API &amp; deployment documentation</li>
+          <li><span class="ck">✓</span>Server / cloud account access</li>
+        </ul></div>
+      <div class="card top-accent border-teal"><h4>Guarantee</h4>
+        <p>The platform must be transferable to another development company at any time — no proprietary lock-in, no withheld credentials, no undocumented dependencies.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 25 DECISIONS -->
+<section class="sec dark" id="decisions">
+  <div class="wrap">
+    <span class="sec-index">27 / 29</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Key Decisions Needed From NEXORA</p>
+      <h2 class="headline">Not just product. <em>Platform, market, and operations</em> — before technical work begins.</h2>
+      <p class="lede">Cross-checked against a market study of Fiverr, Upwork, Toptal, Clutch, GoodFirms, and Catalant/BTG (see the companion Discovery Questionnaire) so every item below is genuinely open — nothing here duplicates a recommendation already made elsewhere in this deck.</p>
+    </div>
+
+    <div class="track-label" style="margin-bottom:10px;color:#6d94ff;">Platform &amp; Matching</div>
+    <ul class="checklist reveal" style="max-width:780px;">
+      <li><span class="ck" style="color:var(--red);">●</span>Confirm the Core MVP scope shown on the roadmap</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Confirm illustrative matching weights or supply preferred criteria, and the typical number of providers invited per request</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Decide whether self-serve provider browse &amp; search ships in MVP or later</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Decide whether requests can be Open to Applications, or invite-only only</li>
+      <li><span class="ck" style="color:var(--red);">●</span>For high-value requests, decide whether NEXORA staff should hand-pick a shortlist rather than rely purely on the algorithm</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Confirm the guest experience: browse and start a request anonymously, sign up only to submit (see §05 Guest Experience)</li>
+    </ul>
+
+    <div class="track-label" style="margin-top:30px;margin-bottom:10px;color:#4fe0c4;">Verification &amp; Trust</div>
+    <ul class="checklist reveal" style="max-width:780px;">
+      <li><span class="ck" style="color:var(--red);">●</span>Confirm tiered verification badges (Bronze/Silver/Gold/Platinum) vs a single "Verified" flag</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Decide whether verification includes financial/legal checks (commercial registration, credit standing) or portfolio/references only</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Decide whether vetting is selective or open-with-review, and whether providers are re-verified periodically</li>
+    </ul>
+
+    <div class="track-label" style="margin-top:30px;margin-bottom:10px;color:#ffc266;">Payments &amp; Monetization</div>
+    <ul class="checklist reveal" style="max-width:780px;">
+      <li><span class="ck" style="color:var(--red);">●</span>Decide whether online payments are in-scope for MVP or deferred</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Confirm target commission percentage, which side(s) pay it, and whether there's a minimum project size or commission floor</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Confirm whether provider subscription / promoted placement is in scope for any phase, and approve the "visibility-only, never matching-score" boundary</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Decide lead-credit vs flat-subscription monetization model for providers</li>
+    </ul>
+
+    <div class="track-label" style="margin-top:30px;margin-bottom:10px;color:#b39bfb;">Categories, Market &amp; Identity</div>
+    <ul class="checklist reveal" style="max-width:780px;">
+      <li><span class="ck" style="color:var(--red);">●</span>Confirm or edit the initial AI service category list, and whether categories stay NEXORA-managed only or open to suggestions</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Decide KSA-only launch vs GCC-wide from day one</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Provide the official NEXORA visual identity for design application, and confirm "NEXORA" is a cleared, registered brand name in KSA</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Decide whether the marketing website lives inside the Marketplace app or as a fully separate site (see Product Breakdown, §19)</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Select preferred SMS / email / AI service providers, if any are mandated</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Approve the recommended proposal &amp; project status sets</li>
+    </ul>
+
+    <div class="track-label" style="margin-top:30px;margin-bottom:10px;color:#ff9ac4;">Go-To-Market &amp; Supply</div>
+    <ul class="checklist reveal" style="max-width:780px;">
+      <li><span class="ck" style="color:var(--red);">●</span>Decide how NEXORA recruits its first cohort of verified providers before public launch (outbound, referral incentives, or open signup), and whether there's a flagship-provider target per category</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Decide how NEXORA acquires its first customers, and whether launch is supply-first, demand-first, or simultaneous</li>
+    </ul>
+
+    <div class="track-label" style="margin-top:30px;margin-bottom:10px;color:#6d94ff;">Team &amp; Operations</div>
+    <ul class="checklist reveal" style="max-width:780px;">
+      <li><span class="ck" style="color:var(--red);">●</span>Confirm who staffs the NEXORA admin team at launch, and in what roles</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Set target SLAs for provider verification and request-review turnaround</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Confirm the customer/provider support model (email, live chat, or full helpdesk) and expected response time</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Confirm NEXORA's day-to-day technical point of contact for the build</li>
+    </ul>
+
+    <div class="track-label" style="margin-top:30px;margin-bottom:10px;color:#ff9494;">Legal, Compliance &amp; Risk</div>
+    <ul class="checklist reveal" style="max-width:780px;">
+      <li><span class="ck" style="color:var(--red);">●</span>Confirm applicable KSA marketplace/commercial regulations, and how VAT is handled on commission revenue</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Confirm the data protection posture relative to Saudi PDPL, given the PII and financial data the platform stores</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Decide whether NEXORA provides a standard contract/SOW template between customer and provider</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Decide what recourse, if any, NEXORA offers if a provider abandons a project or a customer refuses to pay — since payment stays off-platform at MVP</li>
+    </ul>
+
+    <div class="track-label" style="margin-top:30px;margin-bottom:10px;color:#4fe0c4;">Budget &amp; Success Metrics</div>
+    <ul class="checklist reveal" style="max-width:780px;">
+      <li><span class="ck" style="color:var(--red);">●</span>Confirm whether the financial proposal should target a fixed budget ceiling, or be scoped from requirements first</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Define target metrics for the first 3 / 6 / 12 months — providers onboarded, requests submitted, projects completed, transaction value</li>
+      <li><span class="ck" style="color:var(--red);">●</span>Confirm who owns continued iteration after MVP launch — an ongoing retainer with the development team, or an in-house NEXORA team</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 26 NEXT STEPS -->
+<section class="sec cream" id="next">
+  <div class="wrap">
+    <span class="sec-index">28 / 29</span>
+    <div class="section-head reveal">
+      <p class="eyebrow">Recommended Next Steps</p>
+      <h2 class="headline">From this presentation to a signed MVP proposal.</h2>
+    </div>
+    <div class="grid grid-4 reveal">
+      <div class="card top-accent border-blue"><div class="eyebrow" style="margin-bottom:10px;">Step 01</div><h4>Review this presentation</h4><p>Confirm the platform understanding and flag anything mis-scoped.</p></div>
+      <div class="card top-accent border-blue"><div class="eyebrow" style="margin-bottom:10px;">Step 02</div><h4>Resolve open decisions</h4><p>Work through the decisions list in the previous section — including the new discovery, showcase, and subscription questions.</p></div>
+      <div class="card top-accent border-blue"><div class="eyebrow" style="margin-bottom:10px;">Step 03</div><h4>Receive the financial proposal</h4><p>A separate document breaking down MVP cost, future-phase cost, timeline, hosting, and support tiers.</p></div>
+      <div class="card top-accent border-blue"><div class="eyebrow" style="margin-bottom:10px;">Step 04</div><h4>Kick off discovery</h4><p>Finalise architecture, design system application, and sprint plan.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 27 CLOSING -->
+<section class="sec closing" id="closing">
+  <div class="blob" style="width:600px;height:600px;top:-260px;left:50%;transform:translateX(-50%);background:radial-gradient(circle,rgba(26,86,255,0.18),transparent 70%);"></div>
+  <div class="wrap" style="position:relative;z-index:2;">
+    <span class="sec-index" style="position:static;display:block;margin-bottom:18px;">29 / 29</span>
+    <h2>NEXORA becomes the trust layer the AI market doesn't have yet.</h2>
+    <p>Every request, match, proposal, and rating adds to a compounding advantage: a marketplace where good providers are found faster, and good customers are recognised for it.</p>
+    <div class="cta-row" style="justify-content:center;">
+      <a href="#cover" class="btn btn-blue">Back to Top</a>
+      <a href="#decisions" class="btn btn-line">Review Open Decisions</a>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="brand" style="margin-bottom:12px;"><span class="brand-mark"></span><span class="brand-word">NEXORA</span></div>
+        <p style="font-size:12.5px;line-height:1.6;color:var(--txt-faint);max-width:240px;">AI Solutions Marketplace. Qualification, matching, and trust — built for the KSA B2B market.</p>
+      </div>
+      <div class="foot-col"><div class="foot-col-title">Platform</div><ul>
+        <li><a href="#ecosystem">Ecosystem</a></li><li><a href="#e2e">How It Works</a></li><li><a href="#discover">Discovery Model</a></li><li><a href="#reputation">Trust Layer</a></li>
+      </ul></div>
+      <div class="foot-col"><div class="foot-col-title">Journeys</div><ul>
+        <li><a href="#customer-journey">Customer</a></li><li><a href="#provider-journey">Provider</a></li><li><a href="#showcase">Showcase</a></li><li><a href="#admin-journey">Admin</a></li>
+      </ul></div>
+      <div class="foot-col"><div class="foot-col-title">Scope</div><ul>
+        <li><a href="#roadmap">MVP Roadmap</a></li><li><a href="#promotion">Subscription</a></li><li><a href="#decisions">Decisions</a></li><li><a href="#next">Next Steps</a></li>
+      </ul></div>
+      <div class="foot-col"><div class="foot-col-title">Document</div><ul>
+        <li>Platform Presentation</li><li>Pre-financial proposal</li><li>No pricing included</li>
+      </ul></div>
+    </div>
+    <div class="foot-bottom">
+      <span>NEXORA — Platform Presentation</span>
+      <span>Financial proposal to follow separately</span>
+    </div>
+  </div>
+  <div class="ghost-word"><span>NEXORA</span></div>
+</footer>
+
+</main>
+
+<script>
+(function(){
+  var progress = document.getElementById('progress');
+  function onScroll(){
+    var h = document.documentElement;
+    var pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    progress.style.width = pct + '%';
+  }
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  var drawer = document.getElementById('drawer');
+  var overlay = document.getElementById('drawer-overlay');
+  var openBtn = document.getElementById('drawerBtn');
+  var closeBtn = document.getElementById('drawerClose');
+  function openDrawer(){ drawer.classList.add('open'); overlay.classList.add('open'); }
+  function closeDrawer(){ drawer.classList.remove('open'); overlay.classList.remove('open'); }
+  openBtn.addEventListener('click', openDrawer);
+  closeBtn.addEventListener('click', closeDrawer);
+  overlay.addEventListener('click', closeDrawer);
+  drawer.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', closeDrawer); });
+
+  var sections = Array.prototype.slice.call(document.querySelectorAll('.sec'));
+  var links = Array.prototype.slice.call(document.querySelectorAll('#drawer a'));
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        var id = e.target.id;
+        links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === '#'+id); });
+      }
+    });
+  }, {rootMargin:'-45% 0px -50% 0px'});
+  sections.forEach(function(s){ io.observe(s); });
+
+  var reveals = document.querySelectorAll('.reveal');
+  var rio = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); rio.unobserve(e.target); } });
+  }, {threshold:0.12});
+  reveals.forEach(function(r){ rio.observe(r); });
+
+  function currentIndex(){
+    var mid = window.scrollY + window.innerHeight*0.3;
+    var idx = 0;
+    sections.forEach(function(s,i){ if(s.offsetTop <= mid) idx = i; });
+    return idx;
+  }
+  document.getElementById('jumpDown').addEventListener('click', function(){
+    var i = Math.min(currentIndex()+1, sections.length-1);
+    sections[i].scrollIntoView({behavior:'smooth'});
+  });
+  document.getElementById('jumpUp').addEventListener('click', function(){
+    var i = Math.max(currentIndex()-1, 0);
+    sections[i].scrollIntoView({behavior:'smooth'});
+  });
+})();
+</script>
+</body>
+</html>
